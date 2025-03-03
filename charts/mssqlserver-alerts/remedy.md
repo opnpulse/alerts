@@ -4,9 +4,15 @@
 
 - #### MSSQLServerInstanceDown
   - Describe the `MSSQLServer` CR, check the reason from conditions and try restarting the pods
+  - Check the KubeDB Operator logs for errors
+  - Check pod status: `kubectl describe pod <mssql-pod> -n <namespace>`
+  - Verify resource limits (CPU/Memory)
+  - Command: `kubectl get mssqlserver <name> -n <namespace> -o yaml`
   - Contact AppsCode team
 - #### MSSQLServerServiceDown
   - Describe the `MSSQLServer` CR and Try restarting all the pods
+  - Check the KubeDB Operator logs for errors
+  - Check pods status: `kubectl describe pod <mssql-pod> -n <namespace>`
   - Contact AppsCode team
 - #### MSSQLServerTooManyConnections
   - Increase MSSQLServer max connections
