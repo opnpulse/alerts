@@ -112,7 +112,7 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.groups.connectivity.rules.natsStalledClients.duration                        |                                               | <code>"5m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStalledClients.severity                        |                                               | <code>warning</code>                             |
 | form.alert.groups.connectivity.rules.natsStaleConnections.enabled                       |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsStaleConnections.duration                      |                                               | <code>"10m"</code>                               |
+| form.alert.groups.connectivity.rules.natsStaleConnections.duration                      |                                               | <code>"0m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStaleConnections.severity                      |                                               | <code>warning</code>                             |
 | form.alert.groups.connectivity.rules.natsSuddenConnectionDrop.enabled                   |                                               | <code>true</code>                                |
 | form.alert.groups.connectivity.rules.natsSuddenConnectionDrop.duration                  |                                               | <code>"5m"</code>                                |
