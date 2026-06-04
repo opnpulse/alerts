@@ -115,7 +115,7 @@ form:
             severity: warning
           natsStaleConnections:
             enabled: true
-            duration: "10m"
+            duration: "0m"
             severity: warning
           natsSuddenConnectionDrop:
             enabled: true
