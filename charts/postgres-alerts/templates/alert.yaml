@@ -103,19 +103,19 @@ spec:
       expr: >-
         (
           sum by (pod) (
-            rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+            rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
           )
           /
           clamp_min(
             sum by (pod) (
-              rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+              rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
             ),
             1
           )
         ) > {{ .rules.postgresHighRollbackRate.val }}
         and
         sum by (pod) (
-          rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+          rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
         ) > 1
       for: {{ .rules.postgresHighRollbackRate.duration }}
       labels:
@@ -139,27 +139,47 @@ spec:
     
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
+        )
+        > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the warning threshold."
     {{- end }}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
+        )
+        > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the critical threshold."
     {{- end }}
   {{ end -}}
   {{ end -}}
