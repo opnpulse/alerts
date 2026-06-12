@@ -24,7 +24,7 @@ spec:
     rules:
     {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.down.enabled .rules.down.severity)) -}}
     - alert: OpenFGADown
-      expr: up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 0 or absent_over_time(up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[2m])
+      expr: up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 0 or absent_over_time(up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])
       for: {{ .rules.down.duration }}
       labels:
         severity: {{ .rules.down.severity }}
