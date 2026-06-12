@@ -45,7 +45,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `openfga-alerts` chart and their default values.
 
-|                          Parameter                          | Description | Default                            |
+|                          Parameter                          | Description |              Default               |
 |-------------------------------------------------------------|-------------|------------------------------------|
 | metadata.resource.group                                     |             | <code>apps</code>                  |
 | metadata.resource.kind                                      |             | <code>Deployment</code>            |
@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the `openfga-alerts` ch
 | form.alert.additionalRuleLabels                             |             | <code>{}</code>                    |
 | form.alert.groups.core.enabled                              |             | <code>warning</code>               |
 | form.alert.groups.core.rules.down.enabled                   |             | <code>true</code>                  |
-| form.alert.groups.core.rules.down.duration                  |             | <code>"5m"</code>                  |
+| form.alert.groups.core.rules.down.duration                  |             | <code>"15m"</code>                 |
 | form.alert.groups.core.rules.down.severity                  |             | <code>critical</code>              |
 | form.alert.groups.core.rules.highRequestLatency.enabled     |             | <code>true</code>                  |
 | form.alert.groups.core.rules.highRequestLatency.duration    |             | <code>"5m"</code>                  |

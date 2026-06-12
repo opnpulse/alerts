@@ -100,14 +100,30 @@ spec:
     {{end -}}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresHighRollbackRate.enabled .rules.postgresHighRollbackRate.severity)) -}}
     - alert: PostgresqlHighRollbackRate
-      expr: rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[3m]) / rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[3m]) > {{ .rules.postgresHighRollbackRate.val }}
+      expr: >-
+        (
+          sum by (pod) (
+            rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+          )
+          /
+          clamp_min(
+            sum by (pod) (
+              rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+            ),
+            1
+          )
+        ) > {{ .rules.postgresHighRollbackRate.val }}
+        and
+        sum by (pod) (
+          rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",datname!~"template0|template1"}[5m])
+        ) > 1
       for: {{ .rules.postgresHighRollbackRate.duration }}
       labels:
         severity: {{ .rules.postgresHighRollbackRate.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Postgresql high rollback rate (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Ratio of transactions being aborted compared to committed is hign. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Transaction rollback rate is above {{ .rules.postgresHighRollbackRate.val }} on {{`{{`}} $labels.pod {{`}}`}} with enough commit volume to make the ratio meaningful."
     {{end -}}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresTooManyConnections.enabled .rules.postgresTooManyConnections.severity)) -}}
     - alert: PostgresTooManyConnections
@@ -118,7 +134,7 @@ spec:
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "PostgreSQL instance has too many connections . {{.rules.postgresTooManyConnections.val}}% of Postgres connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgreSQL instance is using at least {{.rules.postgresTooManyConnections.val}}% of available connections on {{`{{`}} $labels.pod {{`}}`}}."
     {{- end }}
     
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}

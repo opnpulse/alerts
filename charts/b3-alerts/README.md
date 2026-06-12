@@ -62,10 +62,10 @@ The following table lists the configurable parameters of the `b3-alerts` chart a
 | form.alert.additionalRuleLabels                                             |             | <code>{}</code>                                  |
 | form.alert.groups.process.enabled                                           |             | <code>warning</code>                             |
 | form.alert.groups.process.rules.b3Down.enabled                              |             | <code>true</code>                                |
-| form.alert.groups.process.rules.b3Down.duration                             |             | <code>"2m"</code>                                |
+| form.alert.groups.process.rules.b3Down.duration                             |             | <code>"15m"</code>                               |
 | form.alert.groups.process.rules.b3Down.severity                             |             | <code>critical</code>                            |
 | form.alert.groups.process.rules.b3ReplicasNotReady.enabled                  |             | <code>true</code>                                |
-| form.alert.groups.process.rules.b3ReplicasNotReady.duration                 |             | <code>"2m"</code>                                |
+| form.alert.groups.process.rules.b3ReplicasNotReady.duration                 |             | <code>"15m"</code>                               |
 | form.alert.groups.process.rules.b3ReplicasNotReady.severity                 |             | <code>critical</code>                            |
 | form.alert.groups.process.rules.b3HighGoroutineCount.enabled                |             | <code>true</code>                                |
 | form.alert.groups.process.rules.b3HighGoroutineCount.duration               |             | <code>"10m"</code>                               |

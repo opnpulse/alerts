@@ -39,11 +39,11 @@ form:
         rules:
           natsDown:
             enabled: true
-            duration: "2m"
+            duration: "15m"
             severity: critical
           natsReplicasNotReady:
             enabled: true
-            duration: "2m"
+            duration: "15m"
             severity: critical
 
       resourceUtilization:
@@ -107,16 +107,19 @@ form:
             severity: critical
           natsSlowConsumers:
             enabled: true
-            duration: "5m"
+            duration: "2m"
             severity: warning
+            val: 3
           natsStalledClients:
             enabled: true
-            duration: "5m"
+            duration: "2m"
             severity: warning
+            val: 3
           natsStaleConnections:
             enabled: true
-            duration: "0m"
+            duration: "2m"
             severity: warning
+            val: 5
           natsSuddenConnectionDrop:
             enabled: true
             duration: "5m"
@@ -137,8 +140,8 @@ form:
             severity: warning
             val: 2
           natsHighTotalConsumers:
-            enabled: true
-            duration: "5m"
+            enabled: false
+            duration: "15m"
             severity: warning
             val: 100
 

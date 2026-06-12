@@ -26,7 +26,7 @@ form:
         rules:
           down:
             enabled: true
-            duration: "5m"
+            duration: "15m"
             severity: critical
           highRequestLatency:
             enabled: true

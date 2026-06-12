@@ -61,10 +61,10 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.additionalRuleLabels                                                         | # Additional labels for PrometheusRule alerts | <code>{}</code>                                  |
 | form.alert.groups.core.enabled                                                          |                                               | <code>warning</code>                             |
 | form.alert.groups.core.rules.natsDown.enabled                                           |                                               | <code>true</code>                                |
-| form.alert.groups.core.rules.natsDown.duration                                          |                                               | <code>"2m"</code>                                |
+| form.alert.groups.core.rules.natsDown.duration                                          |                                               | <code>"15m"</code>                               |
 | form.alert.groups.core.rules.natsDown.severity                                          |                                               | <code>critical</code>                            |
 | form.alert.groups.core.rules.natsReplicasNotReady.enabled                               |                                               | <code>true</code>                                |
-| form.alert.groups.core.rules.natsReplicasNotReady.duration                              |                                               | <code>"2m"</code>                                |
+| form.alert.groups.core.rules.natsReplicasNotReady.duration                              |                                               | <code>"15m"</code>                               |
 | form.alert.groups.core.rules.natsReplicasNotReady.severity                              |                                               | <code>critical</code>                            |
 | form.alert.groups.resourceUtilization.enabled                                           |                                               | <code>warning</code>                             |
 | form.alert.groups.resourceUtilization.rules.natsJetStreamHighMemoryUsage.enabled        |                                               | <code>true</code>                                |
@@ -106,14 +106,17 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.groups.connectivity.rules.natsJetStreamDisabled.duration                     |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsJetStreamDisabled.severity                     |                                               | <code>critical</code>                            |
 | form.alert.groups.connectivity.rules.natsSlowConsumers.enabled                          |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsSlowConsumers.duration                         |                                               | <code>"5m"</code>                                |
+| form.alert.groups.connectivity.rules.natsSlowConsumers.duration                         |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsSlowConsumers.severity                         |                                               | <code>warning</code>                             |
+| form.alert.groups.connectivity.rules.natsSlowConsumers.val                              |                                               | <code>3</code>                                   |
 | form.alert.groups.connectivity.rules.natsStalledClients.enabled                         |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsStalledClients.duration                        |                                               | <code>"5m"</code>                                |
+| form.alert.groups.connectivity.rules.natsStalledClients.duration                        |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStalledClients.severity                        |                                               | <code>warning</code>                             |
+| form.alert.groups.connectivity.rules.natsStalledClients.val                             |                                               | <code>3</code>                                   |
 | form.alert.groups.connectivity.rules.natsStaleConnections.enabled                       |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsStaleConnections.duration                      |                                               | <code>"0m"</code>                                |
+| form.alert.groups.connectivity.rules.natsStaleConnections.duration                      |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStaleConnections.severity                      |                                               | <code>warning</code>                             |
+| form.alert.groups.connectivity.rules.natsStaleConnections.val                           |                                               | <code>5</code>                                   |
 | form.alert.groups.connectivity.rules.natsSuddenConnectionDrop.enabled                   |                                               | <code>true</code>                                |
 | form.alert.groups.connectivity.rules.natsSuddenConnectionDrop.duration                  |                                               | <code>"5m"</code>                                |
 | form.alert.groups.connectivity.rules.natsSuddenConnectionDrop.severity                  |                                               | <code>warning</code>                             |
@@ -127,8 +130,8 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.groups.consumerManagement.rules.natsSuddenConsumerDrop.duration              |                                               | <code>"5m"</code>                                |
 | form.alert.groups.consumerManagement.rules.natsSuddenConsumerDrop.severity              |                                               | <code>warning</code>                             |
 | form.alert.groups.consumerManagement.rules.natsSuddenConsumerDrop.val                   |                                               | <code>2</code>                                   |
-| form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.enabled               |                                               | <code>true</code>                                |
-| form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.duration              |                                               | <code>"5m"</code>                                |
+| form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.enabled               |                                               | <code>false</code>                               |
+| form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.duration              |                                               | <code>"15m"</code>                               |
 | form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.severity              |                                               | <code>warning</code>                             |
 | form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.val                   |                                               | <code>100</code>                                 |
 | grafana.enabled                                                                         |                                               | <code>false</code>                               |

@@ -48,9 +48,9 @@ form:
             severity: warning
           postgresTooManyConnections:
             enabled: true
-            duration: "2m"
-            val: 80
-            severity: warning
+            duration: "5m"
+            val: 95
+            severity: critical
           postgresNotEnoughConnections:
             enabled: true
             duration: "2m"
@@ -67,8 +67,8 @@ form:
             severity: critical
           postgresHighRollbackRate:
             enabled: true
-            duration: "0m"
-            val: 0.02
+            duration: "5m"
+            val: 0.05
             severity: warning
           postgresSplitBrain:
             enabled: true

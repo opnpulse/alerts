@@ -23,11 +23,11 @@ form:
         rules:
           b3Down:
             enabled: true
-            duration: "2m"
+            duration: "15m"
             severity: critical
           b3ReplicasNotReady:
             enabled: true
-            duration: "2m"
+            duration: "15m"
             severity: critical
           b3HighGoroutineCount:
             enabled: true
