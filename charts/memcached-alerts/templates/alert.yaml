@@ -21,70 +21,76 @@ spec:
   {{ if (include "memcached-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: memcached.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedDown.enabled .rules.memcachedDown.severity)) -}}
+    {{ $memcachedDown := index (default dict .rules) "memcachedDown" }}
+    {{ if (and $memcachedDown (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedDown.enabled $memcachedDown.severity))) -}}
     - alert: MemcachedDown
       expr: memcached_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.memcachedDown.duration }}
+      for: {{ $memcachedDown.duration }}
       labels:
-        severity: {{ .rules.memcachedDown.severity }}
+        severity: {{ $memcachedDown.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Memcached down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Memcached is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedServiceRespawn.enabled .rules.memcachedServiceRespawn.severity)) -}}
+    {{ $memcachedServiceRespawn := index (default dict .rules) "memcachedServiceRespawn" }}
+    {{ if (and $memcachedServiceRespawn (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedServiceRespawn.enabled $memcachedServiceRespawn.severity))) -}}
     - alert: MemcachedServiceRespawn
-      expr:  (memcached_uptime_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{.rules.memcachedServiceRespawn.val}}
-      for: {{ .rules.memcachedServiceRespawn.duration }}
+      expr:  (memcached_uptime_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{$memcachedServiceRespawn.val}}
+      for: {{ $memcachedServiceRespawn.duration }}
       labels:
-        severity: {{ .rules.memcachedServiceRespawn.severity }}
+        severity: {{ $memcachedServiceRespawn.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Memcached service restart (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Memcached service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedConnectionThrottled.enabled .rules.memcachedConnectionThrottled.severity)) -}}
+    {{ $memcachedConnectionThrottled := index (default dict .rules) "memcachedConnectionThrottled" }}
+    {{ if (and $memcachedConnectionThrottled (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedConnectionThrottled.enabled $memcachedConnectionThrottled.severity))) -}}
     - alert: MemcachedConnectionThrottled
-      expr: increase(memcached_connections_yielded_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.memcachedConnectionThrottled.val}}
-      for: {{ .rules.memcachedConnectionThrottled.duration }}
+      expr: increase(memcached_connections_yielded_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$memcachedConnectionThrottled.val}}
+      for: {{ $memcachedConnectionThrottled.duration }}
       labels:
-        severity: {{ .rules.memcachedConnectionThrottled.severity }}
+        severity: {{ $memcachedConnectionThrottled.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Memcached too many connections (> {{.rules.memcachedConnectionThrottled.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.rules.memcachedConnectionThrottled.val}}% of Memcached connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Memcached too many connections (> {{$memcachedConnectionThrottled.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{$memcachedConnectionThrottled.val}}% of Memcached connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedConnectionsNoneMinor.enabled .rules.memcachedConnectionsNoneMinor.severity)) -}}
+    {{ $memcachedConnectionsNoneMinor := index (default dict .rules) "memcachedConnectionsNoneMinor" }}
+    {{ if (and $memcachedConnectionsNoneMinor (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedConnectionsNoneMinor.enabled $memcachedConnectionsNoneMinor.severity))) -}}
     - alert: MemcachedConnectionsNoneMinor
       expr: memcached_current_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.memcachedConnectionsNoneMinor.duration }}
+      for: {{ $memcachedConnectionsNoneMinor.duration }}
       labels:
-        severity: {{ .rules.memcachedConnectionsNoneMinor.severity }}
+        severity: {{ $memcachedConnectionsNoneMinor.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Memcached no connection (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "No connection to memcached {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedItemsNoneMinor.enabled .rules.memcachedItemsNoneMinor.severity)) -}}
+    {{ $memcachedItemsNoneMinor := index (default dict .rules) "memcachedItemsNoneMinor" }}
+    {{ if (and $memcachedItemsNoneMinor (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedItemsNoneMinor.enabled $memcachedItemsNoneMinor.severity))) -}}
     - alert: MemcachedItemsNoneMinor
       expr: memcached_current_items{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.memcachedItemsNoneMinor.duration }}
+      for: {{ $memcachedItemsNoneMinor.duration }}
       labels:
-        severity: {{ .rules.memcachedItemsNoneMinor.severity }}
+        severity: {{ $memcachedItemsNoneMinor.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Memcached has no item ({{.rules.memcachedItemsNoneMinor.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Memcached has no item ({{$memcachedItemsNoneMinor.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Memcached has no item\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedEvictionsLimit.enabled .rules.memcachedEvictionsLimit.severity)) -}}
+    {{ $memcachedEvictionsLimit := index (default dict .rules) "memcachedEvictionsLimit" }}
+    {{ if (and $memcachedEvictionsLimit (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $memcachedEvictionsLimit.enabled $memcachedEvictionsLimit.severity))) -}}
     - alert: memcachedEvictionsLimit
-      expr: increase(memcached_items_evicted_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.memcachedEvictionsLimit.val}}
-      for: {{ .rules.memcachedEvictionsLimit.duration }}
+      expr: increase(memcached_items_evicted_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$memcachedEvictionsLimit.val}}
+      for: {{ $memcachedEvictionsLimit.duration }}
       labels:
-        severity: {{ .rules.memcachedEvictionsLimit.severity }}
+        severity: {{ $memcachedEvictionsLimit.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Memcached has high evictions per minute (> {{.rules.memcachedEvictionsLimit.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Memcached has high evictions per minute (> {{$memcachedEvictionsLimit.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Memcached has high evictions on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
@@ -95,23 +101,25 @@ spec:
   {{ if (include "memcached-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: memcached.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBMemcachedPhaseNotReady
       expr: kubedb_com_memcached_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Memcached Phase NotReady (memcached {{`{{`}} $labels.memcached {{`}}`}})
         description: "KubeDB Memcached Phase not ready on {{`{{`}} $labels.memcached {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "memcached-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBMemcachedPhaseCritical
       expr: kubedb_com_memcached_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "memcached-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Memcached Phase Critical (memcached {{`{{`}} $labels.memcached {{`}}`}})

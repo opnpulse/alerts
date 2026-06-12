@@ -21,64 +21,69 @@ spec:
   {{ if (include "mssqlserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverInstanceDown.enabled .rules.mssqlserverInstanceDown.severity)) -}}
+    {{ $mssqlserverInstanceDown := index (default dict .rules) "mssqlserverInstanceDown" }}
+    {{ if (and $mssqlserverInstanceDown (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $mssqlserverInstanceDown.enabled $mssqlserverInstanceDown.severity))) -}}
     - alert: MSSQLServerInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.mssqlserverInstanceDown.duration }}
+      for: {{ $mssqlserverInstanceDown.duration }}
       labels:
-        severity: {{ .rules.mssqlserverInstanceDown.severity }}
+        severity: {{ $mssqlserverInstanceDown.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServer instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverServiceDown.enabled .rules.mssqlserverServiceDown.severity)) -}}
+    {{ $mssqlserverServiceDown := index (default dict .rules) "mssqlserverServiceDown" }}
+    {{ if (and $mssqlserverServiceDown (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $mssqlserverServiceDown.enabled $mssqlserverServiceDown.severity))) -}}
     - alert: MSSQLServerServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.mssqlserverServiceDown.duration }}
+      for: {{ $mssqlserverServiceDown.duration }}
       labels:
-        severity: {{ .rules.mssqlserverServiceDown.severity }}
+        severity: {{ $mssqlserverServiceDown.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServer service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverRestarted.enabled .rules.mssqlserverRestarted.severity)) -}}
+    {{ $mssqlserverRestarted := index (default dict .rules) "mssqlserverRestarted" }}
+    {{ if (and $mssqlserverRestarted (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $mssqlserverRestarted.enabled $mssqlserverRestarted.severity))) -}}
     - alert: MSSQLServerRestarted
-      expr: mssql_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.mssqlserverRestarted.val }}
-      for: {{ .rules.mssqlserverRestarted.duration }}
+      expr: mssql_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ $mssqlserverRestarted.val }}
+      for: {{ $mssqlserverRestarted.duration }}
       labels:
-        severity: {{ .rules.mssqlserverRestarted.severity }}
+        severity: {{ $mssqlserverRestarted.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServer restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
           kubelet_volume_stats_capacity_bytes{job=~"kubelet"} + on(persistentvolumeclaim) group_left(pod)
           kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$", namespace=~"{{ $.Release.Namespace }}"}
-        )) * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        )) * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
         kubelet_volume_stats_capacity_bytes{job=~"kubelet"} + on(persistentvolumeclaim) group_left(pod)
         kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$", namespace=~"{{ $.Release.Namespace }}"}
-        )) * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        )) * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -92,23 +97,25 @@ spec:
   {{ if (include "mssqlserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBMSSQLServerPhaseNotReady
       expr: kubedb_com_mssqlserver_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB MSSQLServer Phase NotReady (mssqlserver {{`{{`}} $labels.mssqlserver {{`}}`}})
         description: "KubeDB MSSQLServer Phase not ready on {{`{{`}} $labels.mssqlserver {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBMSSQLServerPhaseCritical
       expr: kubedb_com_mssqlserver_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB MSSQLServer Phase Critical (mssqlserver {{`{{`}} $labels.mssqlserver {{`}}`}})
@@ -122,34 +129,37 @@ spec:
   {{ if (include "mssqlserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ $opsRequestOnProgress := index (default dict .rules) "opsRequestOnProgress" }}
+    {{ if (and $opsRequestOnProgress (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestOnProgress.enabled $opsRequestOnProgress.severity))) -}}
     - alert: KubeDBMSSQLServerOpsRequestOnProgress
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestOnProgress.duration }}
+      for: {{ $opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .rules.opsRequestOnProgress.severity }}
+        severity: {{ $opsRequestOnProgress.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServerOpsRequest on progress (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
         description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ $opsRequestStatusProgressingToLong := index (default dict .rules) "opsRequestStatusProgressingToLong" }}
+    {{ if (and $opsRequestStatusProgressingToLong (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestStatusProgressingToLong.enabled $opsRequestStatusProgressingToLong.severity))) -}}
     - alert: KubeDBMSSQLServerOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      for: {{ $opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        severity: {{ $opsRequestStatusProgressingToLong.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServerOpsRequest is in progressing status for too long (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
         description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ $opsRequestFailed := index (default dict .rules) "opsRequestFailed" }}
+    {{ if (and $opsRequestFailed (include "mssqlserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestFailed.enabled $opsRequestFailed.severity))) -}}
     - alert: KubeDBMSSQLServerOpsRequestFailed
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestFailed.duration }}
+      for: {{ $opsRequestFailed.duration }}
       labels:
-        severity: {{ .rules.opsRequestFailed.severity }}
+        severity: {{ $opsRequestFailed.severity }}
         {{- include "mssqlserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: MSSQLServerOpsRequest failed (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})

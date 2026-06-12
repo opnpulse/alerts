@@ -21,64 +21,69 @@ spec:
   {{ if (include "elasticsearch-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHeapUsageTooHigh.enabled .rules.elasticsearchHeapUsageTooHigh.severity)) -}}
+    {{ $elasticsearchHeapUsageTooHigh := index (default dict .rules) "elasticsearchHeapUsageTooHigh" }}
+    {{ if (and $elasticsearchHeapUsageTooHigh (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchHeapUsageTooHigh.enabled $elasticsearchHeapUsageTooHigh.severity))) -}}
     - alert: ElasticsearchHeapUsageTooHigh
-      expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ .rules.elasticsearchHeapUsageTooHigh.val }}
-      for: {{ .rules.elasticsearchHeapUsageTooHigh.duration }}
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ $elasticsearchHeapUsageTooHigh.val }}
+      for: {{ $elasticsearchHeapUsageTooHigh.duration }}
       labels:
-        severity: {{ .rules.elasticsearchHeapUsageTooHigh.severity }}
+        severity: {{ $elasticsearchHeapUsageTooHigh.severity }}
         alertname: elasticsearch_heap_usage_too_high
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch Heap Usage Too High (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "The heap usage is over {{ .rules.elasticsearchHeapUsageTooHigh.val -}}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "The heap usage is over {{ $elasticsearchHeapUsageTooHigh.val -}}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHeapUsageWarning.enabled .rules.elasticsearchHeapUsageWarning.severity)) -}}
+    {{ $elasticsearchHeapUsageWarning := index (default dict .rules) "elasticsearchHeapUsageWarning" }}
+    {{ if (and $elasticsearchHeapUsageWarning (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchHeapUsageWarning.enabled $elasticsearchHeapUsageWarning.severity))) -}}
     - alert: ElasticsearchHeapUsageWarning
-      expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ .rules.elasticsearchHeapUsageWarning.val }}
-      for: {{ .rules.elasticsearchHeapUsageWarning.duration }}
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ $elasticsearchHeapUsageWarning.val }}
+      for: {{ $elasticsearchHeapUsageWarning.duration }}
       labels:
-        severity: {{ .rules.elasticsearchHeapUsageWarning.severity }}
+        severity: {{ $elasticsearchHeapUsageWarning.severity }}
         alertname: elasticsearch_heap_usage_warning
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch Heap Usage warning (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "The heap usage is over {{ .rules.elasticsearchHeapUsageWarning.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "The heap usage is over {{ $elasticsearchHeapUsageWarning.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchDiskOutOfSpace.enabled .rules.elasticsearchDiskOutOfSpace.severity)) -}}
+    {{ $elasticsearchDiskOutOfSpace := index (default dict .rules) "elasticsearchDiskOutOfSpace" }}
+    {{ if (and $elasticsearchDiskOutOfSpace (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchDiskOutOfSpace.enabled $elasticsearchDiskOutOfSpace.severity))) -}}
     - alert: ElasticsearchDiskOutOfSpace
-      expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 .rules.elasticsearchDiskOutOfSpace.val }}
-      for: {{ .rules.elasticsearchDiskOutOfSpace.duration }}
+      expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 $elasticsearchDiskOutOfSpace.val }}
+      for: {{ $elasticsearchDiskOutOfSpace.duration }}
       labels:
-        severity: {{ .rules.elasticsearchDiskOutOfSpace.severity }}
+        severity: {{ $elasticsearchDiskOutOfSpace.severity }}
         alertname: elasticsearch_disk_out_of_space
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch disk out of space (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "The disk usage is over {{ .rules.elasticsearchDiskOutOfSpace.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "The disk usage is over {{ $elasticsearchDiskOutOfSpace.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchDiskSpaceLow.enabled .rules.elasticsearchDiskSpaceLow.severity)) -}}
+    {{ $elasticsearchDiskSpaceLow := index (default dict .rules) "elasticsearchDiskSpaceLow" }}
+    {{ if (and $elasticsearchDiskSpaceLow (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchDiskSpaceLow.enabled $elasticsearchDiskSpaceLow.severity))) -}}
     - alert: ElasticsearchDiskSpaceLow
-      expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 .rules.elasticsearchDiskSpaceLow.val }}
-      for: {{ .rules.elasticsearchDiskSpaceLow.duration }}
+      expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 $elasticsearchDiskSpaceLow.val }}
+      for: {{ $elasticsearchDiskSpaceLow.duration }}
       labels:
-        severity: {{ .rules.elasticsearchDiskSpaceLow.severity }}
+        severity: {{ $elasticsearchDiskSpaceLow.severity }}
         alertname: elasticsearch_disk_space_low
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch disk space low (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "The disk usage is over {{ .rules.elasticsearchDiskSpaceLow.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "The disk usage is over {{ $elasticsearchDiskSpaceLow.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchClusterRed.enabled .rules.elasticsearchClusterRed.severity)) -}}
+    {{ $elasticsearchClusterRed := index (default dict .rules) "elasticsearchClusterRed" }}
+    {{ if (and $elasticsearchClusterRed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchClusterRed.enabled $elasticsearchClusterRed.severity))) -}}
     - alert: ElasticsearchClusterRed
       expr: elasticsearch_cluster_health_status{color="red",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.elasticsearchClusterRed.duration }}
+      for: {{ $elasticsearchClusterRed.duration }}
       labels:
-        severity: {{ .rules.elasticsearchClusterRed.severity }}
+        severity: {{ $elasticsearchClusterRed.severity }}
         alertname: elasticsearch_cluster_red
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -86,12 +91,13 @@ spec:
         description: "Elastic Cluster Red status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchClusterYellow.enabled .rules.elasticsearchClusterYellow.severity)) -}}
+    {{ $elasticsearchClusterYellow := index (default dict .rules) "elasticsearchClusterYellow" }}
+    {{ if (and $elasticsearchClusterYellow (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchClusterYellow.enabled $elasticsearchClusterYellow.severity))) -}}
     - alert: ElasticsearchClusterYellow
       expr: elasticsearch_cluster_health_status{color="yellow",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.elasticsearchClusterYellow.duration }}
+      for: {{ $elasticsearchClusterYellow.duration }}
       labels:
-        severity: {{ .rules.elasticsearchClusterYellow.severity }}
+        severity: {{ $elasticsearchClusterYellow.severity }}
         alertname: elasticsearch_cluster_yellow
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -99,12 +105,13 @@ spec:
         description: "Elastic Cluster Yellow status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHealthyNodes.enabled .rules.elasticsearchHealthyNodes.severity)) -}}
+    {{ $elasticsearchHealthyNodes := index (default dict .rules) "elasticsearchHealthyNodes" }}
+    {{ if (and $elasticsearchHealthyNodes (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchHealthyNodes.enabled $elasticsearchHealthyNodes.severity))) -}}
     - alert: ElasticsearchHealthyNodes
-      expr: elasticsearch_cluster_health_number_of_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.elasticsearchHealthyNodes.val }}
-      for: {{ .rules.elasticsearchHealthyNodes.duration }}
+      expr: elasticsearch_cluster_health_number_of_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ $elasticsearchHealthyNodes.val }}
+      for: {{ $elasticsearchHealthyNodes.duration }}
       labels:
-        severity: {{ .rules.elasticsearchHealthyNodes.severity }}
+        severity: {{ $elasticsearchHealthyNodes.severity }}
         alertname: elasticsearch_healthy_nodes
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -112,12 +119,13 @@ spec:
         description: "Missing node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHealthyDataNodes.enabled .rules.elasticsearchHealthyDataNodes.severity)) -}}
+    {{ $elasticsearchHealthyDataNodes := index (default dict .rules) "elasticsearchHealthyDataNodes" }}
+    {{ if (and $elasticsearchHealthyDataNodes (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchHealthyDataNodes.enabled $elasticsearchHealthyDataNodes.severity))) -}}
     - alert: ElasticsearchHealthyDataNodes
-      expr: elasticsearch_cluster_health_number_of_data_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.elasticsearchHealthyDataNodes.val }}
-      for: {{ .rules.elasticsearchHealthyDataNodes.duration }}
+      expr: elasticsearch_cluster_health_number_of_data_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ $elasticsearchHealthyDataNodes.val }}
+      for: {{ $elasticsearchHealthyDataNodes.duration }}
       labels:
-        severity: {{ .rules.elasticsearchHealthyDataNodes.severity }}
+        severity: {{ $elasticsearchHealthyDataNodes.severity }}
         alertname: elasticsearch_healthy_data_nodes
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -125,12 +133,13 @@ spec:
         description: "Missing data node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchRelocatingShards.enabled .rules.elasticsearchRelocatingShards.severity)) -}}
+    {{ $elasticsearchRelocatingShards := index (default dict .rules) "elasticsearchRelocatingShards" }}
+    {{ if (and $elasticsearchRelocatingShards (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchRelocatingShards.enabled $elasticsearchRelocatingShards.severity))) -}}
     - alert: ElasticsearchRelocatingShards
       expr: elasticsearch_cluster_health_relocating_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.elasticsearchRelocatingShards.duration }}
+      for: {{ $elasticsearchRelocatingShards.duration }}
       labels:
-        severity: {{ .rules.elasticsearchRelocatingShards.severity }}
+        severity: {{ $elasticsearchRelocatingShards.severity }}
         alertname: elasticsearch_relocating_shards
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -138,12 +147,13 @@ spec:
         description: "Elasticsearch is relocating shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchInitializingShards.enabled .rules.elasticsearchInitializingShards.severity)) -}}
+    {{ $elasticsearchInitializingShards := index (default dict .rules) "elasticsearchInitializingShards" }}
+    {{ if (and $elasticsearchInitializingShards (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchInitializingShards.enabled $elasticsearchInitializingShards.severity))) -}}
     - alert: ElasticsearchInitializingShards
       expr: elasticsearch_cluster_health_initializing_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.elasticsearchInitializingShards.duration }}
+      for: {{ $elasticsearchInitializingShards.duration }}
       labels:
-        severity: {{ .rules.elasticsearchInitializingShards.severity }}
+        severity: {{ $elasticsearchInitializingShards.severity }}
         alertname: elasticsearch_initializing_shards
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -151,12 +161,13 @@ spec:
         description: "Elasticsearch is initializing shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchUnassignedShards.enabled .rules.elasticsearchUnassignedShards.severity)) -}}
+    {{ $elasticsearchUnassignedShards := index (default dict .rules) "elasticsearchUnassignedShards" }}
+    {{ if (and $elasticsearchUnassignedShards (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchUnassignedShards.enabled $elasticsearchUnassignedShards.severity))) -}}
     - alert: ElasticsearchUnassignedShards
       expr: elasticsearch_cluster_health_unassigned_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.elasticsearchUnassignedShards.duration }}
+      for: {{ $elasticsearchUnassignedShards.duration }}
       labels:
-        severity: {{ .rules.elasticsearchUnassignedShards.severity }}
+        severity: {{ $elasticsearchUnassignedShards.severity }}
         alertname: elasticsearch_unassigned_shards
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -164,12 +175,13 @@ spec:
         description: "Elasticsearch has unassigned shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchPendingTasks.enabled .rules.elasticsearchPendingTasks.severity)) -}}
+    {{ $elasticsearchPendingTasks := index (default dict .rules) "elasticsearchPendingTasks" }}
+    {{ if (and $elasticsearchPendingTasks (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchPendingTasks.enabled $elasticsearchPendingTasks.severity))) -}}
     - alert: ElasticsearchPendingTasks
       expr: elasticsearch_cluster_health_number_of_pending_tasks{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.elasticsearchPendingTasks.duration }}
+      for: {{ $elasticsearchPendingTasks.duration }}
       labels:
-        severity: {{ .rules.elasticsearchPendingTasks.severity }}
+        severity: {{ $elasticsearchPendingTasks.severity }}
         alertname: elasticsearch_pending_tasks
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -177,12 +189,13 @@ spec:
         description: "Elasticsearch has pending tasks. Cluster works slowly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchNoNewDocuments10m.enabled .rules.elasticsearchNoNewDocuments10m.severity)) -}}
+    {{ $elasticsearchNoNewDocuments10m := index (default dict .rules) "elasticsearchNoNewDocuments10m" }}
+    {{ if (and $elasticsearchNoNewDocuments10m (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $elasticsearchNoNewDocuments10m.enabled $elasticsearchNoNewDocuments10m.severity))) -}}
     - alert: ElasticsearchNoNewDocuments10m
       expr: increase(elasticsearch_indices_docs{es_data_node="true",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[10m]) < 1
-      for: {{ .rules.elasticsearchNoNewDocuments10m.duration }}
+      for: {{ $elasticsearchNoNewDocuments10m.duration }}
       labels:
-        severity: {{ .rules.elasticsearchNoNewDocuments10m.severity }}
+        severity: {{ $elasticsearchNoNewDocuments10m.severity }}
         alertname: elasticsearch_no_new_documents_10m
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -190,25 +203,27 @@ spec:
         description: "No new documents for 10 min!\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -222,23 +237,25 @@ spec:
   {{ if (include "elasticsearch-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBElasticsearchPhaseNotReady
       expr: kubedb_com_elasticsearch_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Elasticsearch Phase NotReady (elasticsearch {{`{{`}} $labels.elasticsearch {{`}}`}})
         description: "KubeDB Elasticsearch Phase not ready on {{`{{`}} $labels.elasticsearch {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBElasticsearchPhaseCritical
       expr: kubedb_com_elasticsearch_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Elasticsearch Phase Critical (elasticsearch {{`{{`}} $labels.elasticsearch {{`}}`}})
@@ -252,34 +269,37 @@ spec:
   {{ if (include "elasticsearch-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ $opsRequestOnProgress := index (default dict .rules) "opsRequestOnProgress" }}
+    {{ if (and $opsRequestOnProgress (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestOnProgress.enabled $opsRequestOnProgress.severity))) -}}
     - alert: KubeDBElasticsearchOpsRequestOnProgress
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestOnProgress.duration }}
+      for: {{ $opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .rules.opsRequestOnProgress.severity }}
+        severity: {{ $opsRequestOnProgress.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest on progress (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "ElasticsearchOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ $opsRequestStatusProgressingToLong := index (default dict .rules) "opsRequestStatusProgressingToLong" }}
+    {{ if (and $opsRequestStatusProgressingToLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestStatusProgressingToLong.enabled $opsRequestStatusProgressingToLong.severity))) -}}
     - alert: KubeDBElasticsearchOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      for: {{ $opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        severity: {{ $opsRequestStatusProgressingToLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest is in progressing status for too long (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "ElasticsearchOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ $opsRequestFailed := index (default dict .rules) "opsRequestFailed" }}
+    {{ if (and $opsRequestFailed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestFailed.enabled $opsRequestFailed.severity))) -}}
     - alert: KubeDBElasticsearchOpsRequestFailed
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestFailed.duration }}
+      for: {{ $opsRequestFailed.duration }}
       labels:
-        severity: {{ .rules.opsRequestFailed.severity }}
+        severity: {{ $opsRequestFailed.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest failed (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
@@ -293,81 +313,88 @@ spec:
   {{ if (include "elasticsearch-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ $backupSessionFailed := index (default dict .rules) "backupSessionFailed" }}
+    {{ if (and $backupSessionFailed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionFailed.enabled $backupSessionFailed.severity))) -}}
     - alert: ElasticsearchStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.backupSessionFailed.duration }}
+      for: {{ $backupSessionFailed.duration }}
       labels:
-        severity: {{ .rules.backupSessionFailed.severity }}
+        severity: {{ $backupSessionFailed.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ $restoreSessionFailed := index (default dict .rules) "restoreSessionFailed" }}
+    {{ if (and $restoreSessionFailed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionFailed.enabled $restoreSessionFailed.severity))) -}}
     - alert: ElasticsearchStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.restoreSessionFailed.duration }}
+      for: {{ $restoreSessionFailed.duration }}
       labels:
-        severity: {{ .rules.restoreSessionFailed.severity }}
+        severity: {{ $restoreSessionFailed.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ $noBackupSessionForTooLong := index (default dict .rules) "noBackupSessionForTooLong" }}
+    {{ if (and $noBackupSessionForTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $noBackupSessionForTooLong.enabled $noBackupSessionForTooLong.severity))) -}}
     - alert: ElasticsearchStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
-      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ $noBackupSessionForTooLong.val }}
+      for: {{ $noBackupSessionForTooLong.duration }}
       labels:
-        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        severity: {{ $noBackupSessionForTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch Stash no backup for last {{ $noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ $repositoryCorrupted := index (default dict .rules) "repositoryCorrupted" }}
+    {{ if (and $repositoryCorrupted (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryCorrupted.enabled $repositoryCorrupted.severity))) -}}
     - alert: ElasticsearchStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.repositoryCorrupted.duration }}
+      for: {{ $repositoryCorrupted.duration }}
       labels:
-        severity: {{ .rules.repositoryCorrupted.severity }}
+        severity: {{ $repositoryCorrupted.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ $repositoryStorageRunningLow := index (default dict .rules) "repositoryStorageRunningLow" }}
+    {{ if (and $repositoryStorageRunningLow (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryStorageRunningLow.enabled $repositoryStorageRunningLow.severity))) -}}
     - alert: ElasticsearchStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
-      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $repositoryStorageRunningLow.val }}
+      for: {{ $repositoryStorageRunningLow.duration }}
       labels:
-        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        severity: {{ $repositoryStorageRunningLow.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch Stash Repository storage more than {{ $repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ $backupSessionPeriodTooLong := index (default dict .rules) "backupSessionPeriodTooLong" }}
+    {{ if (and $backupSessionPeriodTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionPeriodTooLong.enabled $backupSessionPeriodTooLong.severity))) -}}
     - alert: ElasticsearchStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
-      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $backupSessionPeriodTooLong.val }}
+      for: {{ $backupSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        severity: {{ $backupSessionPeriodTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  Elasticsearch Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  Elasticsearch Stash backup session took more than {{ $backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ $restoreSessionPeriodTooLong := index (default dict .rules) "restoreSessionPeriodTooLong" }}
+    {{ if (and $restoreSessionPeriodTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionPeriodTooLong.enabled $restoreSessionPeriodTooLong.severity))) -}}
     - alert: ElasticsearchStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
-      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $restoreSessionPeriodTooLong.val }}
+      for: {{ $restoreSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        severity: {{ $restoreSessionPeriodTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  Elasticsearch Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  Elasticsearch Stash restore session took more than {{ $restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
@@ -378,81 +405,88 @@ spec:
   {{ if (include "elasticsearch-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ $backupSessionFailed := index (default dict .rules) "backupSessionFailed" }}
+    {{ if (and $backupSessionFailed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionFailed.enabled $backupSessionFailed.severity))) -}}
     - alert: ElasticsearchKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.backupSessionFailed.duration }}
+      for: {{ $backupSessionFailed.duration }}
       labels:
-        severity: {{ .rules.backupSessionFailed.severity }}
+        severity: {{ $backupSessionFailed.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ $restoreSessionFailed := index (default dict .rules) "restoreSessionFailed" }}
+    {{ if (and $restoreSessionFailed (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionFailed.enabled $restoreSessionFailed.severity))) -}}
     - alert: ElasticsearchKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
-      for: {{ .rules.restoreSessionFailed.duration }}
+      for: {{ $restoreSessionFailed.duration }}
       labels:
-        severity: {{ .rules.restoreSessionFailed.severity }}
+        severity: {{ $restoreSessionFailed.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ $noBackupSessionForTooLong := index (default dict .rules) "noBackupSessionForTooLong" }}
+    {{ if (and $noBackupSessionForTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $noBackupSessionForTooLong.enabled $noBackupSessionForTooLong.severity))) -}}
     - alert: ElasticsearchKubeStashNoBackupSessionForTooLong
-      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
-      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ $noBackupSessionForTooLong.val }}
+      for: {{ $noBackupSessionForTooLong.duration }}
       labels:
-        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        severity: {{ $noBackupSessionForTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch KubeStash no backup for last {{ $noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ $repositoryCorrupted := index (default dict .rules) "repositoryCorrupted" }}
+    {{ if (and $repositoryCorrupted (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryCorrupted.enabled $repositoryCorrupted.severity))) -}}
     - alert: ElasticsearchKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
-      for: {{ .rules.repositoryCorrupted.duration }}
+      for: {{ $repositoryCorrupted.duration }}
       labels:
-        severity: {{ .rules.repositoryCorrupted.severity }}
+        severity: {{ $repositoryCorrupted.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Elasticsearch KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ $repositoryStorageRunningLow := index (default dict .rules) "repositoryStorageRunningLow" }}
+    {{ if (and $repositoryStorageRunningLow (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryStorageRunningLow.enabled $repositoryStorageRunningLow.severity))) -}}
     - alert: ElasticsearchKubeStashRepositoryStorageRunningLow
-      expr: storage_kubestash_com_repository_size_bytes{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
-      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $repositoryStorageRunningLow.val }}
+      for: {{ $repositoryStorageRunningLow.duration }}
       labels:
-        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        severity: {{ $repositoryStorageRunningLow.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch KubeStash Repository storage more than {{ $repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ $backupSessionPeriodTooLong := index (default dict .rules) "backupSessionPeriodTooLong" }}
+    {{ if (and $backupSessionPeriodTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionPeriodTooLong.enabled $backupSessionPeriodTooLong.severity))) -}}
     - alert: ElasticsearchKubeStashBackupSessionPeriodTooLong
-      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
-      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $backupSessionPeriodTooLong.val }}
+      for: {{ $backupSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        severity: {{ $backupSessionPeriodTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch KubeStash backup session took more than {{ $backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ $restoreSessionPeriodTooLong := index (default dict .rules) "restoreSessionPeriodTooLong" }}
+    {{ if (and $restoreSessionPeriodTooLong (include "elasticsearch-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionPeriodTooLong.enabled $restoreSessionPeriodTooLong.severity))) -}}
     - alert: ElasticsearchKubeStashRestoreSessionPeriodTooLong
-      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
-      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $restoreSessionPeriodTooLong.val }}
+      for: {{ $restoreSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        severity: {{ $restoreSessionPeriodTooLong.severity }}
         {{- include "elasticsearch-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Elasticsearch KubeStash restore session took more than {{ $restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

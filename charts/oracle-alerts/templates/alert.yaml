@@ -21,64 +21,69 @@ spec:
   {{ if (include "oracle-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleInstanceDown.enabled .rules.oracleInstanceDown.severity)) -}}
+    {{ $oracleInstanceDown := index (default dict .rules) "oracleInstanceDown" }}
+    {{ if (and $oracleInstanceDown (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $oracleInstanceDown.enabled $oracleInstanceDown.severity))) -}}
     - alert: OracleInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.oracleInstanceDown.duration }}
+      for: {{ $oracleInstanceDown.duration }}
       labels:
-        severity: {{ .rules.oracleInstanceDown.severity }}
+        severity: {{ $oracleInstanceDown.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Oracle instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleServiceDown.enabled .rules.oracleServiceDown.severity)) -}}
+    {{ $oracleServiceDown := index (default dict .rules) "oracleServiceDown" }}
+    {{ if (and $oracleServiceDown (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $oracleServiceDown.enabled $oracleServiceDown.severity))) -}}
     - alert: OracleServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.oracleServiceDown.duration }}
+      for: {{ $oracleServiceDown.duration }}
       labels:
-        severity: {{ .rules.oracleServiceDown.severity }}
+        severity: {{ $oracleServiceDown.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Oracle service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleRestarted.enabled .rules.oracleRestarted.severity)) -}}
+    {{ $oracleRestarted := index (default dict .rules) "oracleRestarted" }}
+    {{ if (and $oracleRestarted (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $oracleRestarted.enabled $oracleRestarted.severity))) -}}
     - alert: OracleRestarted
-      expr: oracledb_uptime_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.oracleRestarted.val }}
-      for: {{ .rules.oracleRestarted.duration }}
+      expr: oracledb_uptime_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ $oracleRestarted.val }}
+      for: {{ $oracleRestarted.duration }}
       labels:
-        severity: {{ .rules.oracleRestarted.severity }}
+        severity: {{ $oracleRestarted.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Oracle restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
           kubelet_volume_stats_capacity_bytes{job=~"kubelet"} + on(persistentvolumeclaim) group_left(pod)
           kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$", namespace=~"{{ $.Release.Namespace }}"}
-        )) * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        )) * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
         kubelet_volume_stats_capacity_bytes{job=~"kubelet"} + on(persistentvolumeclaim) group_left(pod)
         kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$", namespace=~"{{ $.Release.Namespace }}"}
-        )) * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        )) * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -92,23 +97,25 @@ spec:
   {{ if (include "oracle-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBOraclePhaseNotReady
       expr: kubedb_com_oracle_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Oracle Phase NotReady (oracle {{`{{`}} $labels.oracle {{`}}`}})
         description: "KubeDB Oracle Phase not ready on {{`{{`}} $labels.oracle {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBOraclePhaseCritical
       expr: kubedb_com_oracle_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Oracle Phase Critical (oracle {{`{{`}} $labels.oracle {{`}}`}})
@@ -122,34 +129,37 @@ spec:
   {{ if (include "oracle-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ $opsRequestOnProgress := index (default dict .rules) "opsRequestOnProgress" }}
+    {{ if (and $opsRequestOnProgress (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestOnProgress.enabled $opsRequestOnProgress.severity))) -}}
     - alert: KubeDBOracleOpsRequestOnProgress
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestOnProgress.duration }}
+      for: {{ $opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .rules.opsRequestOnProgress.severity }}
+        severity: {{ $opsRequestOnProgress.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: OracleOpsRequest on progress (oracleopsrequest {{`{{`}} $labels.oracleopsrequest {{`}}`}})
         description: "OracleOpsRequest {{`{{`}} $labels.oracleopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ $opsRequestStatusProgressingToLong := index (default dict .rules) "opsRequestStatusProgressingToLong" }}
+    {{ if (and $opsRequestStatusProgressingToLong (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestStatusProgressingToLong.enabled $opsRequestStatusProgressingToLong.severity))) -}}
     - alert: KubeDBOracleOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      for: {{ $opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        severity: {{ $opsRequestStatusProgressingToLong.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: OracleOpsRequest is in progressing status for too long (oracleopsrequest {{`{{`}} $labels.oracleopsrequest {{`}}`}})
         description: "OracleOpsRequest {{`{{`}} $labels.oracleopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ $opsRequestFailed := index (default dict .rules) "opsRequestFailed" }}
+    {{ if (and $opsRequestFailed (include "oracle-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestFailed.enabled $opsRequestFailed.severity))) -}}
     - alert: KubeDBOracleOpsRequestFailed
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestFailed.duration }}
+      for: {{ $opsRequestFailed.duration }}
       labels:
-        severity: {{ .rules.opsRequestFailed.severity }}
+        severity: {{ $opsRequestFailed.severity }}
         {{- include "oracle-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: OracleOpsRequest failed (oracleopsrequest {{`{{`}} $labels.oracleopsrequest {{`}}`}})

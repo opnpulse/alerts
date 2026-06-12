@@ -21,12 +21,13 @@ spec:
   {{ if (include "rabbitmq-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: rabbitmq.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqFileDescriptorsNearLimit.enabled .rules.rabbitmqFileDescriptorsNearLimit.severity)) -}}
+    {{ $rabbitmqFileDescriptorsNearLimit := index (default dict .rules) "rabbitmqFileDescriptorsNearLimit" }}
+    {{ if (and $rabbitmqFileDescriptorsNearLimit (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqFileDescriptorsNearLimit.enabled $rabbitmqFileDescriptorsNearLimit.severity))) -}}
     - alert: RabbitmqFileDescriptorsNearLimit
       expr: sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (max_over_time(rabbitmq_process_open_fds{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info) / sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (rabbitmq_process_max_fds{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}  * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info) > 0.8
-      for: {{ .rules.rabbitmqFileDescriptorsNearLimit.duration }}
+      for: {{ $rabbitmqFileDescriptorsNearLimit.duration }}
       labels:
-        severity: {{ .rules.rabbitmqFileDescriptorsNearLimit.severity }}
+        severity: {{ $rabbitmqFileDescriptorsNearLimit.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: More than 80% of file descriptors are used on the RabbitMQ node.
@@ -35,21 +36,23 @@ spec:
           See https://www.rabbitmq.com/production-checklist.html#resource-limits-file-handle-limit. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "file descriptors of file descriptor limit are used in RabbitMQ node.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqQueueIsGrowing.enabled .rules.rabbitmqQueueIsGrowing.severity)) -}}
+    {{ $rabbitmqQueueIsGrowing := index (default dict .rules) "rabbitmqQueueIsGrowing" }}
+    {{ if (and $rabbitmqQueueIsGrowing (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqQueueIsGrowing.enabled $rabbitmqQueueIsGrowing.severity))) -}}
     - alert: RabbitmqQueueIsGrowing
       expr: |
         (
             avg_over_time(rabbitmq_queue_messages{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[10m]) - avg_over_time(rabbitmq_queue_messages{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[10m] offset 1m) > 1
         ) * on (instance, job) group_left(rabbitmq_cluster) rabbitmq_identity_info
-      for: {{ .rules.rabbitmqQueueIsGrowing.duration }}
+      for: {{ $rabbitmqQueueIsGrowing.duration }}
       labels:
-        severity: {{ .rules.rabbitmqQueueIsGrowing.severity }}
+        severity: {{ $rabbitmqQueueIsGrowing.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Queue size is steadily growing over time. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Over the last 10 minutes, A queue in rabbitmq is growing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqUnroutableMessages.enabled .rules.rabbitmqUnroutableMessages.severity)) -}}
+    {{ $rabbitmqUnroutableMessages := index (default dict .rules) "rabbitmqUnroutableMessages" }}
+    {{ if (and $rabbitmqUnroutableMessages (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqUnroutableMessages.enabled $rabbitmqUnroutableMessages.severity))) -}}
     - alert: RabbitmqUnroutableMessages
       expr:  |
         sum by(namespace, rabbitmq_cluster) (increase(rabbitmq_channel_messages_unroutable_dropped_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info)
@@ -57,9 +60,9 @@ spec:
         or
         sum by(namespace, rabbitmq_cluster) (increase(rabbitmq_channel_messages_unroutable_returned_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info)
         >= 1
-      for: {{ .rules.rabbitmqUnroutableMessages.duration }}
+      for: {{ $rabbitmqUnroutableMessages.duration }}
       labels:
-        severity: {{ .rules.rabbitmqUnroutableMessages.severity }}
+        severity: {{ $rabbitmqUnroutableMessages.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: There are messages published into an exchange which cannot be routed and are either dropped silently, or returned to publishers.
@@ -71,16 +74,17 @@ spec:
         description: " There were `{{`{{`}} $value {{`}}`}}` unroutable messages within the last
           5 minutes in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqTCPSocketsNearLimit.enabled .rules.rabbitmqTCPSocketsNearLimit.severity)) -}}
+    {{ $rabbitmqTCPSocketsNearLimit := index (default dict .rules) "rabbitmqTCPSocketsNearLimit" }}
+    {{ if (and $rabbitmqTCPSocketsNearLimit (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqTCPSocketsNearLimit.enabled $rabbitmqTCPSocketsNearLimit.severity))) -}}
     - alert: RabbitmqTCPSocketsNearLimit
       expr:  |
         sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (max_over_time(rabbitmq_process_open_tcp_sockets{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info)
         /
         sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (rabbitmq_process_max_tcp_sockets{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}  * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info)
         > 0.8
-      for: {{ .rules.rabbitmqTCPSocketsNearLimit.duration }}
+      for: {{ $rabbitmqTCPSocketsNearLimit.duration }}
       labels:
-        severity: {{ .rules.rabbitmqTCPSocketsNearLimit.severity }}
+        severity: {{ $rabbitmqTCPSocketsNearLimit.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary:  More than 80% of TCP sockets are open on the RabbitMQ node.
@@ -89,7 +93,8 @@ spec:
           See https://www.rabbitmq.com/networking.html. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "{{`{{`}} $value | humanizePercentage {{`}}`}} TCP sockets of TCP socket limit are open in RabbitMQ node. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqLowDiskWatermarkPredicted.enabled .rules.rabbitmqLowDiskWatermarkPredicted.severity)) -}}
+    {{ $rabbitmqLowDiskWatermarkPredicted := index (default dict .rules) "rabbitmqLowDiskWatermarkPredicted" }}
+    {{ if (and $rabbitmqLowDiskWatermarkPredicted (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqLowDiskWatermarkPredicted.enabled $rabbitmqLowDiskWatermarkPredicted.severity))) -}}
     - alert: RabbitmqLowDiskWatermarkPredicted
       expr: |
         (
@@ -103,9 +108,9 @@ spec:
            >
            0
         )
-      for: {{ .rules.rabbitmqLowDiskWatermarkPredicted.duration }}
+      for: {{ $rabbitmqLowDiskWatermarkPredicted.duration }}
       labels:
-        severity: {{ .rules.rabbitmqLowDiskWatermarkPredicted.severity }}
+        severity: {{ $rabbitmqLowDiskWatermarkPredicted.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary:  Based on the trend of available disk space over the past 24 hours, it's predicted that, in 24 hours from now, a disk alarm will be triggered since the free disk space will drop below the free disk space limit.
@@ -119,7 +124,8 @@ spec:
           https://www.rabbitmq.com/connection-blocked.html. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The predicted free disk space in 24 hours from now is `{{`{{`}} $value | humanize1024 {{`}}`}}B`.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.enabled .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.severity)) -}}
+    {{ $rabbitmqInsufficientEstablishedErlangDistributionLinks := index (default dict .rules) "rabbitmqInsufficientEstablishedErlangDistributionLinks" }}
+    {{ if (and $rabbitmqInsufficientEstablishedErlangDistributionLinks (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqInsufficientEstablishedErlangDistributionLinks.enabled $rabbitmqInsufficientEstablishedErlangDistributionLinks.severity))) -}}
     - alert: RabbitmqInsufficientEstablishedErlangDistributionLinks
       # erlang_vm_dist_node_state: 1=pending, 2=up_pending, 3=up
       expr: count by (namespace, rabbitmq_cluster) (erlang_vm_dist_node_state{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"} * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info == 3)
@@ -127,9 +133,9 @@ spec:
         count by (namespace, rabbitmq_cluster) (rabbitmq_build_info{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"} * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info)
         *
         (count by (namespace, rabbitmq_cluster) (rabbitmq_build_info{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"} * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info) -1 )
-      for: {{ .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.duration }}
+      for: {{ $rabbitmqInsufficientEstablishedErlangDistributionLinks.duration }}
       labels:
-        severity: {{ .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.severity }}
+        severity: {{ $rabbitmqInsufficientEstablishedErlangDistributionLinks.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: RabbitMQ clusters have a full mesh topology.
@@ -142,12 +148,13 @@ spec:
           of the Grafana dashboard `Erlang-Distribution`. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: " There are only `{{`{{`}} $value {{`}}`}}` established Erlang distribution links in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqHighConnectionChurn.enabled .rules.rabbitmqHighConnectionChurn.severity)) -}}
+    {{ $rabbitmqHighConnectionChurn := index (default dict .rules) "rabbitmqHighConnectionChurn" }}
+    {{ if (and $rabbitmqHighConnectionChurn (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqHighConnectionChurn.enabled $rabbitmqHighConnectionChurn.severity))) -}}
     - alert: RabbitmqHighConnectionChurn
       expr: (sum(rate(rabbitmq_connections_closed_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node) rabbitmq_identity_info) by(namespace, rabbitmq_cluster) + sum(rate(rabbitmq_connections_opened_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node) rabbitmq_identity_info) by(namespace, rabbitmq_cluster)) / sum (rabbitmq_connections * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info) by (namespace, rabbitmq_cluster) > 0.1
-      for: {{ .rules.rabbitmqHighConnectionChurn.duration }}
+      for: {{ $rabbitmqHighConnectionChurn.duration }}
       labels:
-        severity: {{ .rules.rabbitmqHighConnectionChurn.severity }}
+        severity: {{ $rabbitmqHighConnectionChurn.severity }}
       {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary:  More than 10% of total connections are churning.
@@ -156,49 +163,53 @@ spec:
         description: "Over the last 5 minutes, `{{`{{`}} $value | humanizePercentage {{`}}`}}`
           of total connections are closed or opened per second in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqPhaseCritical.enabled .rules.rabbitmqPhaseCritical.severity)) -}}
+    {{ $rabbitmqPhaseCritical := index (default dict .rules) "rabbitmqPhaseCritical" }}
+    {{ if (and $rabbitmqPhaseCritical (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqPhaseCritical.enabled $rabbitmqPhaseCritical.severity))) -}}
     - alert: RabbitMQPhaseCritical
       expr: kubedb_com_rabbitmq_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
-      for: {{ .rules.rabbitmqPhaseCritical.duration }}
+      for: {{ $rabbitmqPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.rabbitmqPhaseCritical.severity }}
+        severity: {{ $rabbitmqPhaseCritical.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: RabbitMQ database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqDown.enabled .rules.rabbitmqDown.severity)) -}}
+    {{ $rabbitmqDown := index (default dict .rules) "rabbitmqDown" }}
+    {{ if (and $rabbitmqDown (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $rabbitmqDown.enabled $rabbitmqDown.severity))) -}}
     - alert: RabbitMQDown
       expr: kubedb_com_rabbitmq_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
-      for: {{ .rules.rabbitmqDown.duration }}
+      for: {{ $rabbitmqDown.duration }}
       labels:
-        severity: {{ .rules.rabbitmqDown.severity }}
+        severity: {{ $rabbitmqDown.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: RabbitMQ database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -212,23 +223,25 @@ spec:
   {{ if (include "rabbitmq-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: rabbitmq.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBRabbitMQPhaseNotReady
       expr: kubedb_com_rabbitmq_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB RabbitMQ Phase NotReady (rabbitmq {{`{{`}} $labels.rabbitmq {{`}}`}})
         description: "KubeDB RabbitMQ Phase not ready on {{`{{`}} $labels.rabbitmq {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "rabbitmq-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBRabbitMQPhaseCritical
       expr: kubedb_com_rabbitmq_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "rabbitmq-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB RabbitMQ Phase Critical (rabbitmq {{`{{`}} $labels.rabbitmq {{`}}`}})

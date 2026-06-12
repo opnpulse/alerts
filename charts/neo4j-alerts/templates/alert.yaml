@@ -21,12 +21,13 @@ spec:
     {{- if (include "neo4j-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
     - name: neo4j.database.{{ $.Release.Namespace }}.{{ $app }}.rules
       rules:
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighCPUUsage.enabled .rules.neo4jHighCPUUsage.severity)) }}
+        {{ $neo4jHighCPUUsage := index (default dict .rules) "neo4jHighCPUUsage" }}
+        {{ if (and $neo4jHighCPUUsage (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jHighCPUUsage.enabled $neo4jHighCPUUsage.severity))) -}}
         - alert: Neo4jHighCPUUsage
-          expr: avg(irate(container_cpu_usage_seconds_total{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}[5m])) by (pod) * 100 > {{ .rules.neo4jHighCPUUsage.val }}
-          for: {{ .rules.neo4jHighCPUUsage.duration }}
+          expr: avg(irate(container_cpu_usage_seconds_total{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}[5m])) by (pod) * 100 > {{ $neo4jHighCPUUsage.val }}
+          for: {{ $neo4jHighCPUUsage.duration }}
           labels:
-            severity: {{ .rules.neo4jHighCPUUsage.severity }}
+            severity: {{ $neo4jHighCPUUsage.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: High CPU usage on Neo4j pods (pod {{`{{`}} $labels.pod {{`}}`}})
@@ -36,12 +37,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighMemoryUsage.enabled .rules.neo4jHighMemoryUsage.severity)) }}
+        {{ $neo4jHighMemoryUsage := index (default dict .rules) "neo4jHighMemoryUsage" }}
+        {{ if (and $neo4jHighMemoryUsage (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jHighMemoryUsage.enabled $neo4jHighMemoryUsage.severity))) -}}
         - alert: Neo4jHighMemoryUsage
-          expr: avg(container_memory_working_set_bytes{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) / avg(kube_pod_container_resource_limits{resource="memory",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) * 100 > {{ .rules.neo4jHighMemoryUsage.val }}
-          for: {{ .rules.neo4jHighMemoryUsage.duration }}
+          expr: avg(container_memory_working_set_bytes{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) / avg(kube_pod_container_resource_limits{resource="memory",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) * 100 > {{ $neo4jHighMemoryUsage.val }}
+          for: {{ $neo4jHighMemoryUsage.duration }}
           labels:
-            severity: {{ .rules.neo4jHighMemoryUsage.severity }}
+            severity: {{ $neo4jHighMemoryUsage.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: High memory usage on Neo4j pods (pod {{`{{`}} $labels.pod {{`}}`}})
@@ -51,12 +53,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheUsageRatioHigh.enabled .rules.neo4jPageCacheUsageRatioHigh.severity)) }}
+        {{ $neo4jPageCacheUsageRatioHigh := index (default dict .rules) "neo4jPageCacheUsageRatioHigh" }}
+        {{ if (and $neo4jPageCacheUsageRatioHigh (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jPageCacheUsageRatioHigh.enabled $neo4jPageCacheUsageRatioHigh.severity))) -}}
         - alert: Neo4jPageCacheUsageRatioHigh
-          expr: neo4j_dbms_page_cache_usage_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} > {{ .rules.neo4jPageCacheUsageRatioHigh.val }}
-          for: {{ .rules.neo4jPageCacheUsageRatioHigh.duration }}
+          expr: neo4j_dbms_page_cache_usage_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} > {{ $neo4jPageCacheUsageRatioHigh.val }}
+          for: {{ $neo4jPageCacheUsageRatioHigh.duration }}
           labels:
-            severity: {{ .rules.neo4jPageCacheUsageRatioHigh.severity }}
+            severity: {{ $neo4jPageCacheUsageRatioHigh.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Neo4j page cache usage ratio is high (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -68,12 +71,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheHitRatioLow.enabled .rules.neo4jPageCacheHitRatioLow.severity)) }}
+        {{ $neo4jPageCacheHitRatioLow := index (default dict .rules) "neo4jPageCacheHitRatioLow" }}
+        {{ if (and $neo4jPageCacheHitRatioLow (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jPageCacheHitRatioLow.enabled $neo4jPageCacheHitRatioLow.severity))) -}}
         - alert: Neo4jPageCacheHitRatioLow
-          expr: neo4j_dbms_page_cache_hit_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} < {{ .rules.neo4jPageCacheHitRatioLow.val }}
-          for: {{ .rules.neo4jPageCacheHitRatioLow.duration }}
+          expr: neo4j_dbms_page_cache_hit_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} < {{ $neo4jPageCacheHitRatioLow.val }}
+          for: {{ $neo4jPageCacheHitRatioLow.duration }}
           labels:
-            severity: {{ .rules.neo4jPageCacheHitRatioLow.severity }}
+            severity: {{ $neo4jPageCacheHitRatioLow.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Neo4j page cache hit ratio is low (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -85,12 +89,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultsHigh.enabled .rules.neo4jPageFaultsHigh.severity)) }}
+        {{ $neo4jPageFaultsHigh := index (default dict .rules) "neo4jPageFaultsHigh" }}
+        {{ if (and $neo4jPageFaultsHigh (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jPageFaultsHigh.enabled $neo4jPageFaultsHigh.severity))) -}}
         - alert: Neo4jPageFaultsHigh
-          expr: increase(neo4j_dbms_page_cache_page_faults_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultsHigh.val }}
-          for: {{ .rules.neo4jPageFaultsHigh.duration }}
+          expr: increase(neo4j_dbms_page_cache_page_faults_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ $neo4jPageFaultsHigh.val }}
+          for: {{ $neo4jPageFaultsHigh.duration }}
           labels:
-            severity: {{ .rules.neo4jPageFaultsHigh.severity }}
+            severity: {{ $neo4jPageFaultsHigh.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Neo4j page faults are high (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -102,12 +107,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultFailuresHigh.enabled .rules.neo4jPageFaultFailuresHigh.severity)) }}
+        {{ $neo4jPageFaultFailuresHigh := index (default dict .rules) "neo4jPageFaultFailuresHigh" }}
+        {{ if (and $neo4jPageFaultFailuresHigh (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $neo4jPageFaultFailuresHigh.enabled $neo4jPageFaultFailuresHigh.severity))) -}}
         - alert: Neo4jPageFaultFailuresHigh
-          expr: increase(neo4j_dbms_page_cache_page_fault_failures_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultFailuresHigh.val }}
-          for: {{ .rules.neo4jPageFaultFailuresHigh.duration }}
+          expr: increase(neo4j_dbms_page_cache_page_fault_failures_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ $neo4jPageFaultFailuresHigh.val }}
+          for: {{ $neo4jPageFaultFailuresHigh.duration }}
           labels:
-            severity: {{ .rules.neo4jPageFaultFailuresHigh.severity }}
+            severity: {{ $neo4jPageFaultFailuresHigh.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Neo4j page fault failures detected (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -119,12 +125,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) }}
+        {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+        {{ if (and $diskUsageHigh (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
         - alert: DiskUsageHigh
-          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskUsageHigh.val }}
-          for: {{ .rules.diskUsageHigh.duration }}
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ $diskUsageHigh.val }}
+          for: {{ $diskUsageHigh.duration }}
           labels:
-            severity: {{ .rules.diskUsageHigh.severity }}
+            severity: {{ $diskUsageHigh.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Persistent Volume usage is high (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -135,12 +142,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) }}
+        {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+        {{ if (and $diskAlmostFull (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
         - alert: DiskAlmostFull
-          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskAlmostFull.val }}
-          for: {{ .rules.diskAlmostFull.duration }}
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ $diskAlmostFull.val }}
+          for: {{ $diskAlmostFull.duration }}
           labels:
-            severity: {{ .rules.diskAlmostFull.severity }}
+            severity: {{ $diskAlmostFull.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Persistent Volume is almost full (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -157,12 +165,13 @@ spec:
     {{- if (include "neo4j-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
     - name: neo4j.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
       rules:
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) }}
+        {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+        {{ if (and $appPhaseNotReady (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
         - alert: KubeDBNeo4jPhaseNotReady
           expr: kubedb_com_neo4j_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-          for: {{ .rules.appPhaseNotReady.duration }}
+          for: {{ $appPhaseNotReady.duration }}
           labels:
-            severity: {{ .rules.appPhaseNotReady.severity }}
+            severity: {{ $appPhaseNotReady.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: KubeDB Neo4j Phase NotReady (neo4j {{`{{`}} $labels.neo4j {{`}}`}})
@@ -173,12 +182,13 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) }}
+        {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+        {{ if (and $appPhaseCritical (include "neo4j-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
         - alert: KubeDBNeo4jPhaseCritical
           expr: kubedb_com_neo4j_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-          for: {{ .rules.appPhaseCritical.duration }}
+          for: {{ $appPhaseCritical.duration }}
           labels:
-            severity: {{ .rules.appPhaseCritical.severity }}
+            severity: {{ $appPhaseCritical.severity }}
             {{- include "neo4j-alerts.alertLabels" $ | nindent 12 }}
           annotations:
             summary: KubeDB Neo4j Phase Critical (neo4j {{`{{`}} $labels.neo4j {{`}}`}})

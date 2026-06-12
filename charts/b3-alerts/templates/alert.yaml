@@ -24,56 +24,60 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.process.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3Down.enabled .rules.b3Down.severity)) }}
+    {{ $b3Down := index (default dict .rules) "b3Down" }}
+    {{ if (and $b3Down (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3Down.enabled $b3Down.severity))) -}}
     - alert: B3Down
       expr: >-
         up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 0
         or absent_over_time(up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[2m])
-      for: {{ .rules.b3Down.duration }}
+      for: {{ $b3Down.duration }}
       labels:
-        severity: {{ .rules.b3Down.severity }}
+        severity: {{ $b3Down.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 target is down or missing from Prometheus scrapes"
         description: "Prometheus has not observed a healthy B3 scrape target for job {{`{{`}} $labels.job {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}}."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3ReplicasNotReady.enabled .rules.b3ReplicasNotReady.severity)) }}
+    {{ $b3ReplicasNotReady := index (default dict .rules) "b3ReplicasNotReady" }}
+    {{ if (and $b3ReplicasNotReady (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3ReplicasNotReady.enabled $b3ReplicasNotReady.severity))) -}}
     - alert: B3ReplicasNotReady
       expr: >-
         max(kube_statefulset_status_replicas_ready{namespace="{{ $.Release.Namespace }}",statefulset="{{ $app }}"})
         <
         max(kube_statefulset_replicas{namespace="{{ $.Release.Namespace }}",statefulset="{{ $app }}"})
-      for: {{ .rules.b3ReplicasNotReady.duration }}
+      for: {{ $b3ReplicasNotReady.duration }}
       labels:
-        severity: {{ .rules.b3ReplicasNotReady.severity }}
+        severity: {{ $b3ReplicasNotReady.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 StatefulSet has fewer ready replicas than desired"
         description: "The B3 StatefulSet {{ $app }} has fewer ready replicas than desired in namespace {{ $.Release.Namespace }}."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighGcPauseDuration.enabled .rules.b3HighGcPauseDuration.severity)) }}
+    {{ $b3HighGcPauseDuration := index (default dict .rules) "b3HighGcPauseDuration" }}
+    {{ if (and $b3HighGcPauseDuration (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighGcPauseDuration.enabled $b3HighGcPauseDuration.severity))) -}}
     - alert: B3HighGcPauseDuration
       expr: >-
-        go_gc_duration_seconds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",quantile=~"1|1.0"} > {{ .rules.b3HighGcPauseDuration.val }}
-      for: {{ .rules.b3HighGcPauseDuration.duration }}
+        go_gc_duration_seconds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",quantile=~"1|1.0"} > {{ $b3HighGcPauseDuration.val }}
+      for: {{ $b3HighGcPauseDuration.duration }}
       labels:
-        severity: {{ .rules.b3HighGcPauseDuration.severity }}
+        severity: {{ $b3HighGcPauseDuration.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 target has high GC pause duration"
-        description: "A B3 scrape target has GC pause duration above {{ .rules.b3HighGcPauseDuration.val }}s."
+        description: "A B3 scrape target has GC pause duration above {{ $b3HighGcPauseDuration.val }}s."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighFileDescriptorUsage.enabled .rules.b3HighFileDescriptorUsage.severity)) }}
+    {{ $b3HighFileDescriptorUsage := index (default dict .rules) "b3HighFileDescriptorUsage" }}
+    {{ if (and $b3HighFileDescriptorUsage (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighFileDescriptorUsage.enabled $b3HighFileDescriptorUsage.severity))) -}}
     - alert: B3HighFileDescriptorUsage
       expr: >-
-        (process_open_fds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / process_max_fds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ .rules.b3HighFileDescriptorUsage.val }}
-      for: {{ .rules.b3HighFileDescriptorUsage.duration }}
+        (process_open_fds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / process_max_fds{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ $b3HighFileDescriptorUsage.val }}
+      for: {{ $b3HighFileDescriptorUsage.duration }}
       labels:
-        severity: {{ .rules.b3HighFileDescriptorUsage.severity }}
+        severity: {{ $b3HighFileDescriptorUsage.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 target has high file descriptor usage"
-        description: "A B3 scrape target is using more than {{ .rules.b3HighFileDescriptorUsage.val }}% of available file descriptors."
+        description: "A B3 scrape target is using more than {{ $b3HighFileDescriptorUsage.val }}% of available file descriptors."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -85,32 +89,34 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.http.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighHttpErrorRate.enabled .rules.b3HighHttpErrorRate.severity)) }}
+    {{ $b3HighHttpErrorRate := index (default dict .rules) "b3HighHttpErrorRate" }}
+    {{ if (and $b3HighHttpErrorRate (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighHttpErrorRate.enabled $b3HighHttpErrorRate.severity))) -}}
     - alert: B3HighHttpErrorRate
       expr: |
         (
           sum(rate(b3_http_server_request_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",http_response_status_code=~"5.."}[5m]))
           /
           sum(rate(b3_http_server_request_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighHttpErrorRate.val }}
-      for: {{ .rules.b3HighHttpErrorRate.duration }}
+        ) * 100 > {{ $b3HighHttpErrorRate.val }}
+      for: {{ $b3HighHttpErrorRate.duration }}
       labels:
-        severity: {{ .rules.b3HighHttpErrorRate.severity }}
+        severity: {{ $b3HighHttpErrorRate.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high HTTP error rate"
-        description: "B3 HTTP 5xx error rate is above {{ .rules.b3HighHttpErrorRate.val }}%."
+        description: "B3 HTTP 5xx error rate is above {{ $b3HighHttpErrorRate.val }}%."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighHttpLatency.enabled .rules.b3HighHttpLatency.severity)) }}
+    {{ $b3HighHttpLatency := index (default dict .rules) "b3HighHttpLatency" }}
+    {{ if (and $b3HighHttpLatency (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighHttpLatency.enabled $b3HighHttpLatency.severity))) -}}
     - alert: B3HighHttpLatency
-      expr: histogram_quantile(0.99, sum(rate(b3_http_server_request_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le)) > {{ .rules.b3HighHttpLatency.val }}
-      for: {{ .rules.b3HighHttpLatency.duration }}
+      expr: histogram_quantile(0.99, sum(rate(b3_http_server_request_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le)) > {{ $b3HighHttpLatency.val }}
+      for: {{ $b3HighHttpLatency.duration }}
       labels:
-        severity: {{ .rules.b3HighHttpLatency.severity }}
+        severity: {{ $b3HighHttpLatency.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high HTTP latency"
-        description: "B3 HTTP request p99 latency is above {{ .rules.b3HighHttpLatency.val }}s."
+        description: "B3 HTTP request p99 latency is above {{ $b3HighHttpLatency.val }}s."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -122,59 +128,63 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighDatabaseErrorRate.enabled .rules.b3HighDatabaseErrorRate.severity)) }}
+    {{ $b3HighDatabaseErrorRate := index (default dict .rules) "b3HighDatabaseErrorRate" }}
+    {{ if (and $b3HighDatabaseErrorRate (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighDatabaseErrorRate.enabled $b3HighDatabaseErrorRate.severity))) -}}
     - alert: B3HighDatabaseErrorRate
       expr: |
         (
           sum(rate(b3_db_client_operation_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",error="true"}[5m]))
           /
           sum(rate(b3_db_client_operation_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighDatabaseErrorRate.val }}
-      for: {{ .rules.b3HighDatabaseErrorRate.duration }}
+        ) * 100 > {{ $b3HighDatabaseErrorRate.val }}
+      for: {{ $b3HighDatabaseErrorRate.duration }}
       labels:
-        severity: {{ .rules.b3HighDatabaseErrorRate.severity }}
+        severity: {{ $b3HighDatabaseErrorRate.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high database error rate"
-        description: "B3 database error rate is above {{ .rules.b3HighDatabaseErrorRate.val }}%."
+        description: "B3 database error rate is above {{ $b3HighDatabaseErrorRate.val }}%."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighDatabaseLatency.enabled .rules.b3HighDatabaseLatency.severity)) }}
+    {{ $b3HighDatabaseLatency := index (default dict .rules) "b3HighDatabaseLatency" }}
+    {{ if (and $b3HighDatabaseLatency (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighDatabaseLatency.enabled $b3HighDatabaseLatency.severity))) -}}
     - alert: B3HighDatabaseLatency
-      expr: histogram_quantile(0.99, sum(rate(b3_db_client_operation_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le, db_system)) > {{ .rules.b3HighDatabaseLatency.val }}
-      for: {{ .rules.b3HighDatabaseLatency.duration }}
+      expr: histogram_quantile(0.99, sum(rate(b3_db_client_operation_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le, db_system)) > {{ $b3HighDatabaseLatency.val }}
+      for: {{ $b3HighDatabaseLatency.duration }}
       labels:
-        severity: {{ .rules.b3HighDatabaseLatency.severity }}
+        severity: {{ $b3HighDatabaseLatency.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high database latency ({{`{{`}} $labels.db_system {{`}}`}})"
-        description: "B3 database {{`{{`}} $labels.db_system {{`}}`}} p99 latency is above {{ .rules.b3HighDatabaseLatency.val }}s."
+        description: "B3 database {{`{{`}} $labels.db_system {{`}}`}} p99 latency is above {{ $b3HighDatabaseLatency.val }}s."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3DatabaseConnectionErrors.enabled .rules.b3DatabaseConnectionErrors.severity)) }}
+    {{ $b3DatabaseConnectionErrors := index (default dict .rules) "b3DatabaseConnectionErrors" }}
+    {{ if (and $b3DatabaseConnectionErrors (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3DatabaseConnectionErrors.enabled $b3DatabaseConnectionErrors.severity))) -}}
     - alert: B3DatabaseConnectionErrors
-      expr: sum(rate(b3_db_client_connection_error_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) * 60 > {{ .rules.b3DatabaseConnectionErrors.val }}
-      for: {{ .rules.b3DatabaseConnectionErrors.duration }}
+      expr: sum(rate(b3_db_client_connection_error_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) * 60 > {{ $b3DatabaseConnectionErrors.val }}
+      for: {{ $b3DatabaseConnectionErrors.duration }}
       labels:
-        severity: {{ .rules.b3DatabaseConnectionErrors.severity }}
+        severity: {{ $b3DatabaseConnectionErrors.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 database connection errors"
-        description: "B3 is experiencing more than {{ .rules.b3DatabaseConnectionErrors.val }} database connection errors per minute."
+        description: "B3 is experiencing more than {{ $b3DatabaseConnectionErrors.val }} database connection errors per minute."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighDatabaseConnectionPoolUsage.enabled .rules.b3HighDatabaseConnectionPoolUsage.severity)) }}
+    {{ $b3HighDatabaseConnectionPoolUsage := index (default dict .rules) "b3HighDatabaseConnectionPoolUsage" }}
+    {{ if (and $b3HighDatabaseConnectionPoolUsage (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighDatabaseConnectionPoolUsage.enabled $b3HighDatabaseConnectionPoolUsage.severity))) -}}
     - alert: B3HighDatabaseConnectionPoolUsage
       expr: |
         (
           sum(b3_db_connections_active{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"})
           /
           sum(b3_db_connections_limit{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"})
-        ) * 100 > {{ .rules.b3HighDatabaseConnectionPoolUsage.val }}
-      for: {{ .rules.b3HighDatabaseConnectionPoolUsage.duration }}
+        ) * 100 > {{ $b3HighDatabaseConnectionPoolUsage.val }}
+      for: {{ $b3HighDatabaseConnectionPoolUsage.duration }}
       labels:
-        severity: {{ .rules.b3HighDatabaseConnectionPoolUsage.severity }}
+        severity: {{ $b3HighDatabaseConnectionPoolUsage.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high database connection pool usage"
-        description: "B3 database connection pool usage is above {{ .rules.b3HighDatabaseConnectionPoolUsage.val }}%."
+        description: "B3 database connection pool usage is above {{ $b3HighDatabaseConnectionPoolUsage.val }}%."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -212,21 +222,22 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.storage.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighBlobStorageErrorRate.enabled .rules.b3HighBlobStorageErrorRate.severity)) }}
+    {{ $b3HighBlobStorageErrorRate := index (default dict .rules) "b3HighBlobStorageErrorRate" }}
+    {{ if (and $b3HighBlobStorageErrorRate (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighBlobStorageErrorRate.enabled $b3HighBlobStorageErrorRate.severity))) -}}
     - alert: B3HighBlobStorageErrorRate
       expr: |
         (
           sum(rate(b3_blobfs_operations_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",success="false"}[5m]))
           /
           sum(rate(b3_blobfs_operations_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighBlobStorageErrorRate.val }}
-      for: {{ .rules.b3HighBlobStorageErrorRate.duration }}
+        ) * 100 > {{ $b3HighBlobStorageErrorRate.val }}
+      for: {{ $b3HighBlobStorageErrorRate.duration }}
       labels:
-        severity: {{ .rules.b3HighBlobStorageErrorRate.severity }}
+        severity: {{ $b3HighBlobStorageErrorRate.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high blob storage error rate"
-        description: "B3 blob storage error rate is above {{ .rules.b3HighBlobStorageErrorRate.val }}%."
+        description: "B3 blob storage error rate is above {{ $b3HighBlobStorageErrorRate.val }}%."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -238,32 +249,34 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.proxy.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighProxyErrorRate.enabled .rules.b3HighProxyErrorRate.severity)) }}
+    {{ $b3HighProxyErrorRate := index (default dict .rules) "b3HighProxyErrorRate" }}
+    {{ if (and $b3HighProxyErrorRate (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighProxyErrorRate.enabled $b3HighProxyErrorRate.severity))) -}}
     - alert: B3HighProxyErrorRate
       expr: |
         (
           sum(rate(b3_proxy_k8s_operation_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",proxy_request_status_code=~"5.."}[5m]))
           /
           sum(rate(b3_proxy_k8s_operation_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighProxyErrorRate.val }}
-      for: {{ .rules.b3HighProxyErrorRate.duration }}
+        ) * 100 > {{ $b3HighProxyErrorRate.val }}
+      for: {{ $b3HighProxyErrorRate.duration }}
       labels:
-        severity: {{ .rules.b3HighProxyErrorRate.severity }}
+        severity: {{ $b3HighProxyErrorRate.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high K8s proxy error rate"
-        description: "B3 Kubernetes proxy error rate is above {{ .rules.b3HighProxyErrorRate.val }}%."
+        description: "B3 Kubernetes proxy error rate is above {{ $b3HighProxyErrorRate.val }}%."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighProxyLatency.enabled .rules.b3HighProxyLatency.severity)) }}
+    {{ $b3HighProxyLatency := index (default dict .rules) "b3HighProxyLatency" }}
+    {{ if (and $b3HighProxyLatency (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $b3HighProxyLatency.enabled $b3HighProxyLatency.severity))) -}}
     - alert: B3HighProxyLatency
-      expr: histogram_quantile(0.99, sum(rate(b3_proxy_request_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le, proxy_k8s_cluster)) > {{ .rules.b3HighProxyLatency.val }}
-      for: {{ .rules.b3HighProxyLatency.duration }}
+      expr: histogram_quantile(0.99, sum(rate(b3_proxy_request_duration_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])) by (le, proxy_k8s_cluster)) > {{ $b3HighProxyLatency.val }}
+      for: {{ $b3HighProxyLatency.duration }}
       labels:
-        severity: {{ .rules.b3HighProxyLatency.severity }}
+        severity: {{ $b3HighProxyLatency.severity }}
         {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "B3 high K8s proxy latency (cluster {{`{{`}} $labels.proxy_k8s_cluster {{`}}`}})"
-        description: "B3 Kubernetes proxy p99 latency for cluster {{`{{`}} $labels.proxy_k8s_cluster {{`}}`}} is above {{ .rules.b3HighProxyLatency.val }}s."
+        description: "B3 Kubernetes proxy p99 latency for cluster {{`{{`}} $labels.proxy_k8s_cluster {{`}}`}} is above {{ $b3HighProxyLatency.val }}s."
 {{- end }}
 {{- end }}
 {{- end }}

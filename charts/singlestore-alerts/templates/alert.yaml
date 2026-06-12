@@ -21,114 +21,124 @@ spec:
   {{ if (include "singlestore-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreInstanceDown.enabled .rules.singlestoreInstanceDown.severity)) -}}
+    {{ $singlestoreInstanceDown := index (default dict .rules) "singlestoreInstanceDown" }}
+    {{ if (and $singlestoreInstanceDown (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreInstanceDown.enabled $singlestoreInstanceDown.severity))) -}}
     - alert: SinglestoreInstanceDown
       expr: memsql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.singlestoreInstanceDown.duration }}
+      for: {{ $singlestoreInstanceDown.duration }}
       labels:
-        severity: {{ .rules.singlestoreInstanceDown.severity }}
+        severity: {{ $singlestoreInstanceDown.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Singlestore instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreServiceDown.enabled .rules.singlestoreServiceDown.severity)) -}}
+    {{ $singlestoreServiceDown := index (default dict .rules) "singlestoreServiceDown" }}
+    {{ if (and $singlestoreServiceDown (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreServiceDown.enabled $singlestoreServiceDown.severity))) -}}
     - alert: SinglestoreServiceDown
       expr: sum by (service) (memsql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.singlestoreServiceDown.duration }}
+      for: {{ $singlestoreServiceDown.duration }}
       labels:
-        severity: {{ .rules.singlestoreServiceDown.severity }}
+        severity: {{ $singlestoreServiceDown.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Singlestore service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreTooManyConnections.enabled .rules.singlestoreTooManyConnections.severity)) -}}
+    {{ $singlestoreTooManyConnections := index (default dict .rules) "singlestoreTooManyConnections" }}
+    {{ if (and $singlestoreTooManyConnections (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreTooManyConnections.enabled $singlestoreTooManyConnections.severity))) -}}
     - alert: SinglestoreTooManyConnections
-      expr: max_over_time(memsql_status_threads_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.singlestoreTooManyConnections.val}}
-      for: {{ .rules.singlestoreTooManyConnections.duration }}
+      expr: max_over_time(memsql_status_threads_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{$singlestoreTooManyConnections.val}}
+      for: {{ $singlestoreTooManyConnections.duration }}
       labels:
-        severity: {{ .rules.singlestoreTooManyConnections.severity }}
+        severity: {{ $singlestoreTooManyConnections.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore too many connections (> {{.rules.singlestoreTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.rules.singlestoreTooManyConnections.val}}% of Singlestore connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Singlestore too many connections (> {{$singlestoreTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{$singlestoreTooManyConnections.val}}% of Singlestore connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighThreadsRunning.enabled .rules.singlestoreHighThreadsRunning.severity)) -}}
+    {{ $singlestoreHighThreadsRunning := index (default dict .rules) "singlestoreHighThreadsRunning" }}
+    {{ if (and $singlestoreHighThreadsRunning (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreHighThreadsRunning.enabled $singlestoreHighThreadsRunning.severity))) -}}
     - alert: SinglestoreHighThreadsRunning
-      expr: max_over_time(memsql_status_threads_running{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.singlestoreHighThreadsRunning.val}}
-      for: {{ .rules.singlestoreHighThreadsRunning.duration }}
+      expr: max_over_time(memsql_status_threads_running{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{$singlestoreHighThreadsRunning.val}}
+      for: {{ $singlestoreHighThreadsRunning.duration }}
       labels:
-        severity: {{ .rules.singlestoreHighThreadsRunning.severity }}
+        severity: {{ $singlestoreHighThreadsRunning.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore high threads running (> {{.rules.singlestoreHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.rules.singlestoreHighThreadsRunning.val}}% of Singlestore threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Singlestore high threads running (> {{$singlestoreHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{$singlestoreHighThreadsRunning.val}}% of Singlestore threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreRestarted.enabled .rules.singlestoreRestarted.severity)) -}}
+    {{ $singlestoreRestarted := index (default dict .rules) "singlestoreRestarted" }}
+    {{ if (and $singlestoreRestarted (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreRestarted.enabled $singlestoreRestarted.severity))) -}}
     - alert: SinglestoreRestarted
-      expr: memsql_status_uptime{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{.rules.singlestoreRestarted.val}}
-      for: {{ .rules.singlestoreRestarted.duration }}
+      expr: memsql_status_uptime{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{$singlestoreRestarted.val}}
+      for: {{ $singlestoreRestarted.duration }}
       labels:
-        severity: {{ .rules.singlestoreRestarted.severity }}
+        severity: {{ $singlestoreRestarted.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore restarted ({{.rules.singlestoreRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Singlestore restarted ({{$singlestoreRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighQPS.enabled .rules.singlestoreHighQPS.severity)) -}}
+    {{ $singlestoreHighQPS := index (default dict .rules) "singlestoreHighQPS" }}
+    {{ if (and $singlestoreHighQPS (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreHighQPS.enabled $singlestoreHighQPS.severity))) -}}
     - alert: SinglestoreHighQPS
-      expr: rate(memsql_status_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighQPS.val}}
-      for: {{ .rules.singlestoreHighQPS.duration }}
+      expr: rate(memsql_status_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$singlestoreHighQPS.val}}
+      for: {{ $singlestoreHighQPS.duration }}
       labels:
-        severity: {{ .rules.singlestoreHighQPS.severity }}
+        severity: {{ $singlestoreHighQPS.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore has high queries per second (> {{.rules.singlestoreHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Singlestore has high queries per second (> {{$singlestoreHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighIncomingBytes.enabled .rules.singlestoreHighIncomingBytes.severity)) -}}
+    {{ $singlestoreHighIncomingBytes := index (default dict .rules) "singlestoreHighIncomingBytes" }}
+    {{ if (and $singlestoreHighIncomingBytes (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreHighIncomingBytes.enabled $singlestoreHighIncomingBytes.severity))) -}}
     - alert: SinglestoreHighIncomingBytes
-      expr: rate(memsql_status_bytes_received{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighIncomingBytes.val}}
-      for: {{ .rules.singlestoreHighIncomingBytes.duration }}
+      expr: rate(memsql_status_bytes_received{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$singlestoreHighIncomingBytes.val}}
+      for: {{ $singlestoreHighIncomingBytes.duration }}
       labels:
-        severity: {{ .rules.singlestoreHighIncomingBytes.severity }}
+        severity: {{ $singlestoreHighIncomingBytes.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore has high incoming bytes second (> {{.rules.singlestoreHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Singlestore has high incoming bytes second (> {{$singlestoreHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighOutgoingBytes.enabled .rules.singlestoreHighOutgoingBytes.severity)) -}}
+    {{ $singlestoreHighOutgoingBytes := index (default dict .rules) "singlestoreHighOutgoingBytes" }}
+    {{ if (and $singlestoreHighOutgoingBytes (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $singlestoreHighOutgoingBytes.enabled $singlestoreHighOutgoingBytes.severity))) -}}
     - alert: SinglestoreHighOutgoingBytes
-      expr: rate(memsql_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighOutgoingBytes.val}}
-      for: {{ .rules.singlestoreHighOutgoingBytes.duration }}
+      expr: rate(memsql_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$singlestoreHighOutgoingBytes.val}}
+      for: {{ $singlestoreHighOutgoingBytes.duration }}
       labels:
-        severity: {{ .rules.singlestoreHighOutgoingBytes.severity }}
+        severity: {{ $singlestoreHighOutgoingBytes.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore has high outgoing bytes second (> {{.rules.singlestoreHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Singlestore has high outgoing bytes second (> {{$singlestoreHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -142,23 +152,25 @@ spec:
   {{ if (include "singlestore-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBSinglestorePhaseNotReady
       expr: kubedb_com_singlestore_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Singlestore Phase NotReady (singlestore {{`{{`}} $labels.singlestore {{`}}`}})
         description: "KubeDB Singlestore Phase not ready on {{`{{`}} $labels.singlestore {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBSinglestorePhaseCritical
       expr: kubedb_com_singlestore_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Singlestore Phase Critical (singlestore {{`{{`}} $labels.singlestore {{`}}`}})
@@ -172,81 +184,88 @@ spec:
   {{ if (include "singlestore-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ $backupSessionFailed := index (default dict .rules) "backupSessionFailed" }}
+    {{ if (and $backupSessionFailed (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionFailed.enabled $backupSessionFailed.severity))) -}}
     - alert: SinglestoreKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.backupSessionFailed.duration }}
+      for: {{ $backupSessionFailed.duration }}
       labels:
-        severity: {{ .rules.backupSessionFailed.severity }}
+        severity: {{ $backupSessionFailed.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Singlestore KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ $restoreSessionFailed := index (default dict .rules) "restoreSessionFailed" }}
+    {{ if (and $restoreSessionFailed (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionFailed.enabled $restoreSessionFailed.severity))) -}}
     - alert: SinglestoreKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
-      for: {{ .rules.restoreSessionFailed.duration }}
+      for: {{ $restoreSessionFailed.duration }}
       labels:
-        severity: {{ .rules.restoreSessionFailed.severity }}
+        severity: {{ $restoreSessionFailed.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Singlestore KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ $noBackupSessionForTooLong := index (default dict .rules) "noBackupSessionForTooLong" }}
+    {{ if (and $noBackupSessionForTooLong (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $noBackupSessionForTooLong.enabled $noBackupSessionForTooLong.severity))) -}}
     - alert: SinglestoreKubeStashNoBackupSessionForTooLong
-      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
-      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ $noBackupSessionForTooLong.val }}
+      for: {{ $noBackupSessionForTooLong.duration }}
       labels:
-        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        severity: {{ $noBackupSessionForTooLong.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Singlestore KubeStash no backup for last {{ $noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ $repositoryCorrupted := index (default dict .rules) "repositoryCorrupted" }}
+    {{ if (and $repositoryCorrupted (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryCorrupted.enabled $repositoryCorrupted.severity))) -}}
     - alert: SinglestoreKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
-      for: {{ .rules.repositoryCorrupted.duration }}
+      for: {{ $repositoryCorrupted.duration }}
       labels:
-        severity: {{ .rules.repositoryCorrupted.severity }}
+        severity: {{ $repositoryCorrupted.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Singlestore KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ $repositoryStorageRunningLow := index (default dict .rules) "repositoryStorageRunningLow" }}
+    {{ if (and $repositoryStorageRunningLow (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryStorageRunningLow.enabled $repositoryStorageRunningLow.severity))) -}}
     - alert: SinglestoreKubeStashRepositoryStorageRunningLow
-      expr: storage_kubestash_com_repository_size_bytes{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
-      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $repositoryStorageRunningLow.val }}
+      for: {{ $repositoryStorageRunningLow.duration }}
       labels:
-        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        severity: {{ $repositoryStorageRunningLow.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Singlestore KubeStash Repository storage more than {{ $repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ $backupSessionPeriodTooLong := index (default dict .rules) "backupSessionPeriodTooLong" }}
+    {{ if (and $backupSessionPeriodTooLong (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionPeriodTooLong.enabled $backupSessionPeriodTooLong.severity))) -}}
     - alert: SinglestoreKubeStashBackupSessionPeriodTooLong
-      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
-      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $backupSessionPeriodTooLong.val }}
+      for: {{ $backupSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        severity: {{ $backupSessionPeriodTooLong.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Singlestore KubeStash backup session took more than {{ $backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ $restoreSessionPeriodTooLong := index (default dict .rules) "restoreSessionPeriodTooLong" }}
+    {{ if (and $restoreSessionPeriodTooLong (include "singlestore-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionPeriodTooLong.enabled $restoreSessionPeriodTooLong.severity))) -}}
     - alert: SinglestoreKubeStashRestoreSessionPeriodTooLong
-      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
-      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ $restoreSessionPeriodTooLong.val }}
+      for: {{ $restoreSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        severity: {{ $restoreSessionPeriodTooLong.severity }}
         {{- include "singlestore-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Singlestore KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Singlestore KubeStash restore session took more than {{ $restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

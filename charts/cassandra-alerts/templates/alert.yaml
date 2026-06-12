@@ -21,70 +21,76 @@ spec:
   {{ if (include "cassandra-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: cassandra.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDown.enabled .rules.cassandraDown.severity)) -}}
+    {{ $cassandraDown := index (default dict .rules) "cassandraDown" }}
+    {{ if (and $cassandraDown (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraDown.enabled $cassandraDown.severity))) -}}
     - alert: CassandraDown
-      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.val}}
-      for: {{ .rules.cassandraDown.duration }}
+      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{$cassandraDown.val}}
+      for: {{ $cassandraDown.duration }}
       labels:
-        severity: {{ .rules.cassandraDown.severity }}
+        severity: {{ $cassandraDown.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Cassandra down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraServiceRespawn.enabled .rules.cassandraServiceRespawn.severity)) -}}
+    {{ $cassandraServiceRespawn := index (default dict .rules) "cassandraServiceRespawn" }}
+    {{ if (and $cassandraServiceRespawn (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraServiceRespawn.enabled $cassandraServiceRespawn.severity))) -}}
     - alert: CassandraServiceRespawn
-      expr: (cassandra_stats{name="java:lang:runtime:uptime"}) < {{.rules.cassandraServiceRespawn.val}}
-      for: {{ .rules.cassandraServiceRespawn.duration }}
+      expr: (cassandra_stats{name="java:lang:runtime:uptime"}) < {{$cassandraServiceRespawn.val}}
+      for: {{ $cassandraServiceRespawn.duration }}
       labels:
-        severity: {{ .rules.cassandraServiceRespawn.severity }}
+        severity: {{ $cassandraServiceRespawn.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Cassandra service restart (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraConnectionTimeouts.enabled .rules.cassandraConnectionTimeouts.severity)) -}}
+    {{ $cassandraConnectionTimeouts := index (default dict .rules) "cassandraConnectionTimeouts" }}
+    {{ if (and $cassandraConnectionTimeouts (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraConnectionTimeouts.enabled $cassandraConnectionTimeouts.severity))) -}}
     - alert: ConnectionTimeouts
-      expr: increase(cassandra_stats{name="org:apache:cassandra:metrics:connection:totaltimeouts:count",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.cassandraConnectionTimeouts.val}}
-      for: {{ .rules.cassandraConnectionTimeouts.duration }}
+      expr: increase(cassandra_stats{name="org:apache:cassandra:metrics:connection:totaltimeouts:count",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{$cassandraConnectionTimeouts.val}}
+      for: {{ $cassandraConnectionTimeouts.duration }}
       labels:
-        severity: {{ .rules.cassandraConnectionTimeouts.severity }}
+        severity: {{ $cassandraConnectionTimeouts.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Cassandra too many connections (> {{.rules.cassandraConnectionTimeouts.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.rules.cassandraConnectionTimeouts.val}}% of Cassandra connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Cassandra too many connections (> {{$cassandraConnectionTimeouts.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{$cassandraConnectionTimeouts.val}}% of Cassandra connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDroppedMessages.enabled .rules.cassandraDroppedMessages.severity)) -}}
+    {{ $cassandraDroppedMessages := index (default dict .rules) "cassandraDroppedMessages" }}
+    {{ if (and $cassandraDroppedMessages (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraDroppedMessages.enabled $cassandraDroppedMessages.severity))) -}}
     - alert: DroppedMessages
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:droppedmessage:.*:count",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.cassandraDroppedMessages.duration }}
+      for: {{ $cassandraDroppedMessages.duration }}
       labels:
-        severity: {{ .rules.cassandraDroppedMessages.severity }}
+        severity: {{ $cassandraDroppedMessages.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Cassandra has high drop message (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "High drop message for Cassandra {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraHighReadLatency.enabled .rules.cassandraHighReadLatency.severity)) -}}
+    {{ $cassandraHighReadLatency := index (default dict .rules) "cassandraHighReadLatency" }}
+    {{ if (and $cassandraHighReadLatency (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraHighReadLatency.enabled $cassandraHighReadLatency.severity))) -}}
     - alert: HighReadLatency
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:table:kubedb_keyspace:healthcheck_table:coordinatorreadlatency:99thpercentile",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 7000
-      for: {{ .rules.cassandraHighReadLatency.duration }}
+      for: {{ $cassandraHighReadLatency.duration }}
       labels:
-        severity: {{ .rules.cassandraHighReadLatency.severity }}
+        severity: {{ $cassandraHighReadLatency.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Cassandra has high read latency (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra has high read latency\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraHighWriteLatency.enabled .rules.cassandraHighWriteLatency.severity)) -}}
+    {{ $cassandraHighWriteLatency := index (default dict .rules) "cassandraHighWriteLatency" }}
+    {{ if (and $cassandraHighWriteLatency (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $cassandraHighWriteLatency.enabled $cassandraHighWriteLatency.severity))) -}}
     - alert: HighWriteLatency
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:table:kubedb_keyspace:healthcheck_table:coordinatorwritelatency:99thpercentile",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 7000
-      for: {{ .rules.cassandraHighWriteLatency.duration }}
+      for: {{ $cassandraHighWriteLatency.duration }}
       labels:
-        severity: {{ .rules.cassandraHighWriteLatency.severity }}
+        severity: {{ $cassandraHighWriteLatency.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Cassandra has high write latency (> {{.rules.cassandraHighWriteLatency.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: Cassandra has high write latency (> {{$cassandraHighWriteLatency.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra has high write latency on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
@@ -94,23 +100,25 @@ spec:
   {{ if (include "cassandra-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: cassandra.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBCassandraPhaseNotReady
       expr: kubedb_com_cassandra_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Cassandra Phase NotReady (cassandra {{`{{`}} $labels.cassandra {{`}}`}})
         description: "KubeDB Cassandra Phase not ready on {{`{{`}} $labels.cassandra {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBCassandraPhaseCritical
       expr: kubedb_com_cassandra_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Cassandra Phase Critical (cassandra {{`{{`}} $labels.cassandra {{`}}`}})

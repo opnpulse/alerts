@@ -21,49 +21,53 @@ spec:
   {{ if (include "connectcluster-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: kafka.connectcluster.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterWorkerDown.enabled .rules.connectClusterWorkerDown.severity)) -}}
+    {{ $connectClusterWorkerDown := index (default dict .rules) "connectClusterWorkerDown" }}
+    {{ if (and $connectClusterWorkerDown (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterWorkerDown.enabled $connectClusterWorkerDown.severity))) -}}
     - alert: ConnectClusterWorkerDown
       expr: count(kafka_connect_worker_connector_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.connectClusterWorkerDown.duration }}
+      for: {{ $connectClusterWorkerDown.duration }}
       labels:
-        severity: {{ .rules.connectClusterWorkerDown.severity }}
+        severity: {{ $connectClusterWorkerDown.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: No ConnectCluster Worker Online! (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Worker Count is 0.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTooManyConnections.enabled .rules.connectClusterTooManyConnections.severity)) -}}
+    {{ $connectClusterTooManyConnections := index (default dict .rules) "connectClusterTooManyConnections" }}
+    {{ if (and $connectClusterTooManyConnections (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterTooManyConnections.enabled $connectClusterTooManyConnections.severity))) -}}
     - alert: ConnectClusterTooManyConnections
-      expr: sum(kafka_connect_connection_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.connectClusterTooManyConnections.val }}
-      for: {{ .rules.connectClusterTooManyConnections.duration }}
+      expr: sum(kafka_connect_connection_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $connectClusterTooManyConnections.val }}
+      for: {{ $connectClusterTooManyConnections.duration }}
       labels:
-        severity: {{ .rules.connectClusterTooManyConnections.severity }}
+        severity: {{ $connectClusterTooManyConnections.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  ConnectCluster too many connections (> {{.rules.connectClusterTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.rules.connectClusterTooManyConnections.val}} of ConnectCluster connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary:  ConnectCluster too many connections (> {{$connectClusterTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{$connectClusterTooManyConnections.val}} of ConnectCluster connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterConnectorCount.enabled .rules.connectClusterConnectorCount.severity)) -}}
+    {{ $connectClusterConnectorCount := index (default dict .rules) "connectClusterConnectorCount" }}
+    {{ if (and $connectClusterConnectorCount (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterConnectorCount.enabled $connectClusterConnectorCount.severity))) -}}
     - alert: ConnectClusterConnectorCount
-      expr: sum(kafka_connect_worker_connector_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.connectClusterConnectorCount.val }}
-      for: {{ .rules.connectClusterConnectorCount.duration }}
+      expr: sum(kafka_connect_worker_connector_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $connectClusterConnectorCount.val }}
+      for: {{ $connectClusterConnectorCount.duration }}
       labels:
-        severity: {{ .rules.connectClusterConnectorCount.severity }}
+        severity: {{ $connectClusterConnectorCount.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ConnectCluster has reached connectors threshold. (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "More than {{.rules.connectClusterConnectorCount.val}}% of Connectors are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{$connectClusterConnectorCount.val}}% of Connectors are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterCoordinatorRebalanceFailed.enabled .rules.connectClusterCoordinatorRebalanceFailed.severity)) -}}
+    {{ $connectClusterCoordinatorRebalanceFailed := index (default dict .rules) "connectClusterCoordinatorRebalanceFailed" }}
+    {{ if (and $connectClusterCoordinatorRebalanceFailed (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterCoordinatorRebalanceFailed.enabled $connectClusterCoordinatorRebalanceFailed.severity))) -}}
     - alert: ConnectClusterCoordinatorRebalanceFailed
-      expr: sum(kafka_connect_coordinator_failed_rebalance_total{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.connectClusterCoordinatorRebalanceFailed.val }}
-      for: {{ .rules.connectClusterCoordinatorRebalanceFailed.duration }}
+      expr: sum(kafka_connect_coordinator_failed_rebalance_total{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $connectClusterCoordinatorRebalanceFailed.val }}
+      for: {{ $connectClusterCoordinatorRebalanceFailed.duration }}
       labels:
-        severity: {{ .rules.connectClusterCoordinatorRebalanceFailed.severity }}
+        severity: {{ $connectClusterCoordinatorRebalanceFailed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ConnectCluster total re-balance exceeds the threshold (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ConnectCluster coordinator re-balance exceeds {{.rules.connectClusterConnectorCount.val}}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "ConnectCluster coordinator re-balance exceeds {{ $connectClusterCoordinatorRebalanceFailed.val }}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ end -}}
@@ -72,45 +76,49 @@ spec:
   {{ if (include "connectcluster-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: kafka.connectcluster.task.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskErrorTotalRetries.enabled .rules.connectClusterTaskErrorTotalRetries.severity)) -}}
+    {{ $connectClusterTaskErrorTotalRetries := index (default dict .rules) "connectClusterTaskErrorTotalRetries" }}
+    {{ if (and $connectClusterTaskErrorTotalRetries (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterTaskErrorTotalRetries.enabled $connectClusterTaskErrorTotalRetries.severity))) -}}
     - alert: ConnectClusterTaskErrorTotalRetries
-      expr: sum(kafka_connect_task_error_total_retries{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.connectClusterTaskErrorTotalRetries.val }}
-      for: {{ .rules.connectClusterTaskErrorTotalRetries.duration }}
+      expr: sum(kafka_connect_task_error_total_retries{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $connectClusterTaskErrorTotalRetries.val }}
+      for: {{ $connectClusterTaskErrorTotalRetries.duration }}
       labels:
-        severity: {{ .rules.connectClusterTaskErrorTotalRetries.severity }}
+        severity: {{ $connectClusterTaskErrorTotalRetries.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ConnectCluster task error total retries exceeds. (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ConnectCluster task error total error exceeds the threshold value {{.rules.connectClusterTaskErrorTotalRetries.val}}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "ConnectCluster task error total error exceeds the threshold value {{$connectClusterTaskErrorTotalRetries.val}}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotal.enabled .rules.connectClusterTaskTotal.severity)) -}}
+    {{ $connectClusterTaskTotal := index (default dict .rules) "connectClusterTaskTotal" }}
+    {{ if (and $connectClusterTaskTotal (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterTaskTotal.enabled $connectClusterTaskTotal.severity))) -}}
     - alert: ConnectClusterTaskTotal
-      expr: sum(kafka_connect_worker_connector_total_task_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.connectClusterTaskTotal.val }}
-      for: {{ .rules.connectClusterTaskTotal.duration }}
+      expr: sum(kafka_connect_worker_connector_total_task_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $connectClusterTaskTotal.val }}
+      for: {{ $connectClusterTaskTotal.duration }}
       labels:
-        severity: {{ .rules.connectClusterTaskTotal.severity }}
+        severity: {{ $connectClusterTaskTotal.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ConnectCluster has reached task threshold. (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "More than {{.rules.connectClusterTaskTotal.val}} task are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{$connectClusterTaskTotal.val}} task are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotalFailed.enabled .rules.connectClusterTaskTotalFailed.severity)) -}}
+    {{ $connectClusterTaskTotalFailed := index (default dict .rules) "connectClusterTaskTotalFailed" }}
+    {{ if (and $connectClusterTaskTotalFailed (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterTaskTotalFailed.enabled $connectClusterTaskTotalFailed.severity))) -}}
     - alert: ConnectClusterTaskTotalFailed
       expr: sum(kafka_connect_worker_connector_failed_task_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > 0
-      for: {{ .rules.connectClusterTaskTotalFailed.duration }}
+      for: {{ $connectClusterTaskTotalFailed.duration }}
       labels:
-        severity: {{ .rules.connectClusterTaskTotalFailed.severity }}
+        severity: {{ $connectClusterTaskTotalFailed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Task Failed (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Some task are failed.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotalDestroyed.enabled .rules.connectClusterTaskTotalDestroyed.severity)) -}}
+    {{ $connectClusterTaskTotalDestroyed := index (default dict .rules) "connectClusterTaskTotalDestroyed" }}
+    {{ if (and $connectClusterTaskTotalDestroyed (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $connectClusterTaskTotalDestroyed.enabled $connectClusterTaskTotalDestroyed.severity))) -}}
     - alert: ConnectClusterTaskTotalDestroyed
       expr: sum(kafka_connect_worker_connector_destroyed_task_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > 0
-      for: {{ .rules.connectClusterTaskTotalDestroyed.duration }}
+      for: {{ $connectClusterTaskTotalDestroyed.duration }}
       labels:
-        severity: {{ .rules.connectClusterTaskTotalDestroyed.severity }}
+        severity: {{ $connectClusterTaskTotalDestroyed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Task Destroyed (instance {{`{{`}} $labels.instance {{`}}`}})
@@ -124,23 +132,25 @@ spec:
   {{ if (include "connectcluster-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: kafka.connectcluster.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBConnectClusterPhaseNotReady
       expr: kafka_kubedb_com_connectcluster_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ConnectCluster Phase NotReady (connectcluster {{`{{`}} $labels.connectcluster {{`}}`}})
         description: "KubeDB ConnectCluster Phase not ready on {{`{{`}} $labels.connectcluster {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBConnectClusterPhaseCritical
       expr: kafka_kubedb_com_connectcluster_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ConnectCluster Phase Critical (connectcluster {{`{{`}} $labels.connectcluster {{`}}`}})

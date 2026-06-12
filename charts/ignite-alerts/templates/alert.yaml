@@ -21,113 +21,123 @@ spec:
   {{ if (include "ignite-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: ignite.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteDown.enabled .rules.igniteDown.severity)) -}}
+    {{ $igniteDown := index (default dict .rules) "igniteDown" }}
+    {{ if (and $igniteDown (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteDown.enabled $igniteDown.severity))) -}}
     - alert: IgniteDown
       expr: kubedb_com_ignite_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
-      for: {{ .rules.igniteDown.duration }}
+      for: {{ $igniteDown.duration }}
       labels:
-        severity: {{ .rules.igniteDown.severity }}
+        severity: {{ $igniteDown.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ignitePhaseCritical.enabled .rules.ignitePhaseCritical.severity)) -}}
+    {{ $ignitePhaseCritical := index (default dict .rules) "ignitePhaseCritical" }}
+    {{ if (and $ignitePhaseCritical (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $ignitePhaseCritical.enabled $ignitePhaseCritical.severity))) -}}
     - alert: IgnitePhaseCritical
       expr: kubedb_com_ignite_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
-      for: {{ .rules.ignitePhaseCritical.duration }}
+      for: {{ $ignitePhaseCritical.duration }}
       labels:
-        severity: {{ .rules.ignitePhaseCritical.severity }}
+        severity: {{ $ignitePhaseCritical.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteClusterNoBaselineNode.enabled .rules.igniteClusterNoBaselineNode.severity)) -}}
+    {{ $igniteClusterNoBaselineNode := index (default dict .rules) "igniteClusterNoBaselineNode" }}
+    {{ if (and $igniteClusterNoBaselineNode (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteClusterNoBaselineNode.enabled $igniteClusterNoBaselineNode.severity))) -}}
     - alert: IgniteClusterNoBaselineNode
-      expr: cluster_TotalBaselineNodes{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == {{.rules.igniteClusterNoBaselineNode.val}}
-      for: {{ .rules.igniteClusterNoBaselineNode.duration }}
+      expr: cluster_TotalBaselineNodes{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == {{$igniteClusterNoBaselineNode.val}}
+      for: {{ $igniteClusterNoBaselineNode.duration }}
       labels:
-        severity: {{ .rules.igniteClusterNoBaselineNode.severity }}
+        severity: {{ $igniteClusterNoBaselineNode.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite no baseline node (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite No Baseline Nodes on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteRestarted.enabled .rules.igniteRestarted.severity)) -}}
+    {{ $igniteRestarted := index (default dict .rules) "igniteRestarted" }}
+    {{ if (and $igniteRestarted (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteRestarted.enabled $igniteRestarted.severity))) -}}
     - alert: IgniteRestarted
-      expr: (ignite_uptime{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{.rules.igniteRestarted.val}}
-      for: {{ .rules.igniteRestarted.duration }}
+      expr: (ignite_uptime{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{$igniteRestarted.val}}
+      for: {{ $igniteRestarted.duration }}
       labels:
-        severity: {{ .rules.igniteRestarted.severity }}
+        severity: {{ $igniteRestarted.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite service restart (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighCPULoad.enabled .rules.igniteHighCPULoad.severity)) -}}
+    {{ $igniteHighCPULoad := index (default dict .rules) "igniteHighCPULoad" }}
+    {{ if (and $igniteHighCPULoad (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteHighCPULoad.enabled $igniteHighCPULoad.severity))) -}}
     - alert: IgniteHighCPULoad
-      expr: (sys_CpuLoad{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{.rules.igniteHighCPULoad.val}}
-      for: {{ .rules.igniteHighCPULoad.duration }}
+      expr: (sys_CpuLoad{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{$igniteHighCPULoad.val}}
+      for: {{ $igniteHighCPULoad.duration }}
       labels:
-        severity: {{ .rules.igniteHighCPULoad.severity }}
+        severity: {{ $igniteHighCPULoad.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite System CPU High Load (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite System CPU High Load on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighHeapMemoryUsed.enabled .rules.igniteHighHeapMemoryUsed.severity)) -}}
+    {{ $igniteHighHeapMemoryUsed := index (default dict .rules) "igniteHighHeapMemoryUsed" }}
+    {{ if (and $igniteHighHeapMemoryUsed (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteHighHeapMemoryUsed.enabled $igniteHighHeapMemoryUsed.severity))) -}}
     - alert: IgniteHighHeapMemoryUsed
-      expr:       (100 - (( sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} - sys_memory_heap_used{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 / sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.igniteHighHeapMemoryUsed.val}}
-      for: {{ .rules.igniteHighHeapMemoryUsed.duration }}
+      expr:       (100 - (( sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} - sys_memory_heap_used{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 / sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"})) > {{$igniteHighHeapMemoryUsed.val}}
+      for: {{ $igniteHighHeapMemoryUsed.duration }}
       labels:
-        severity: {{ .rules.igniteHighHeapMemoryUsed.severity }}
+        severity: {{ $igniteHighHeapMemoryUsed.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite High System Heap Memory Used (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite High System Heap Memory Used on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighDataregionOffHeapUsed.enabled .rules.igniteHighDataregionOffHeapUsed.severity)) -}}
+    {{ $igniteHighDataregionOffHeapUsed := index (default dict .rules) "igniteHighDataregionOffHeapUsed" }}
+    {{ if (and $igniteHighDataregionOffHeapUsed (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteHighDataregionOffHeapUsed.enabled $igniteHighDataregionOffHeapUsed.severity))) -}}
     - alert: IgniteHighDataregionOffHeapUsed
-      expr: ((io_dataregion_default_OffheapUsedSize{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) / 1024 / 1024 / 1024)  * 100 > {{.rules.igniteHighDataregionOffHeapUsed.val}}
-      for: {{ .rules.igniteHighDataregionOffHeapUsed.duration }}
+      expr: ((io_dataregion_default_OffheapUsedSize{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) / 1024 / 1024 / 1024)  * 100 > {{$igniteHighDataregionOffHeapUsed.val}}
+      for: {{ $igniteHighDataregionOffHeapUsed.duration }}
       labels:
-        severity: {{ .rules.igniteHighDataregionOffHeapUsed.severity }}
+        severity: {{ $igniteHighDataregionOffHeapUsed.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite High default Dataregion Off Heap Memory Used (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite High default Dataregion Off Heap Memory Used on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteJVMPausesTotalDuration.enabled .rules.igniteJVMPausesTotalDuration.severity)) -}}
+    {{ $igniteJVMPausesTotalDuration := index (default dict .rules) "igniteJVMPausesTotalDuration" }}
+    {{ if (and $igniteJVMPausesTotalDuration (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $igniteJVMPausesTotalDuration.enabled $igniteJVMPausesTotalDuration.severity))) -}}
     - alert: IgniteJVMPausesTotalDuration
-      expr: (ignite_longJVMPausesTotalDuration{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{.rules.igniteJVMPausesTotalDuration.val}}
-      for: {{ .rules.igniteJVMPausesTotalDuration.duration }}
+      expr: (ignite_longJVMPausesTotalDuration{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{$igniteJVMPausesTotalDuration.val}}
+      for: {{ $igniteJVMPausesTotalDuration.duration }}
       labels:
-        severity: {{ .rules.igniteJVMPausesTotalDuration.severity }}
+        severity: {{ $igniteJVMPausesTotalDuration.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Ignite JVM Pauses Total Duration (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ignite JVM Pauses Total Duration on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -141,23 +151,25 @@ spec:
   {{ if (include "ignite-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: ignite.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBIgnitePhaseNotReady
       expr: kubedb_com_ignite_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Ignite Phase NotReady (ignite {{`{{`}} $labels.ignite {{`}}`}})
         description: "KubeDB Ignite Phase not ready on {{`{{`}} $labels.ignite {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBIgnitePhaseCritical
       expr: kubedb_com_ignite_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Ignite Phase Critical (ignite {{`{{`}} $labels.ignite {{`}}`}})

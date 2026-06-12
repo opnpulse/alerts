@@ -21,45 +21,49 @@ spec:
   {{ if (include "pgbouncer-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgbouncer.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerTooManyConnections.enabled .rules.pgbouncerTooManyConnections.severity)) -}}
+    {{ $pgbouncerTooManyConnections := index (default dict .rules) "pgbouncerTooManyConnections" }}
+    {{ if (and $pgbouncerTooManyConnections (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgbouncerTooManyConnections.enabled $pgbouncerTooManyConnections.severity))) -}}
     - alert: pgbouncerTooManyConnections
-      expr: (sum by (pod) (pgbouncer_databases_current_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgbouncer_databases_max_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ .rules.pgbouncerTooManyConnections.val }}
-      for: {{ .rules.pgbouncerTooManyConnections.duration }}
+      expr: (sum by (pod) (pgbouncer_databases_current_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgbouncer_databases_max_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ $pgbouncerTooManyConnections.val }}
+      for: {{ $pgbouncerTooManyConnections.duration }}
       labels:
-        severity: {{ .rules.pgbouncerTooManyConnections.severity }}
+        severity: {{ $pgbouncerTooManyConnections.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: PgBouncer too many connection usage (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PgBouncer {{`{{`}} $labels.pod {{`}}`}} high connection usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerExporterLastScrapeError.enabled .rules.pgbouncerExporterLastScrapeError.severity)) -}}
+    {{ $pgbouncerExporterLastScrapeError := index (default dict .rules) "pgbouncerExporterLastScrapeError" }}
+    {{ if (and $pgbouncerExporterLastScrapeError (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgbouncerExporterLastScrapeError.enabled $pgbouncerExporterLastScrapeError.severity))) -}}
     - alert: PgBouncerExporterLastScrapeError
       expr: pgbouncer_last_scrape_error{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.pgbouncerExporterLastScrapeError.duration }}
+      for: {{ $pgbouncerExporterLastScrapeError.duration }}
       labels:
-        severity: {{ .rules.pgbouncerExporterLastScrapeError.severity }}
+        severity: {{ $pgbouncerExporterLastScrapeError.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: PgBouncer exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PgBouncer exporter is showing errors.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerDown.enabled .rules.pgbouncerDown.severity)) -}}
+    {{ $pgbouncerDown := index (default dict .rules) "pgbouncerDown" }}
+    {{ if (and $pgbouncerDown (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgbouncerDown.enabled $pgbouncerDown.severity))) -}}
     - alert: PgBouncerDown
       expr: pgbouncer_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < 0
-      for: {{ .rules.pgbouncerDown.duration }}
+      for: {{ $pgbouncerDown.duration }}
       labels:
-        severity: {{ .rules.pgbouncerDown.severity }}
+        severity: {{ $pgbouncerDown.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: PgBouncer down (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "pgbouncer is down {{`{{`}} $labels.role {{`}}`}} of pgbouncer {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerLogPoolerError.enabled .rules.pgbouncerLogPoolerError.severity)) -}}
+    {{ $pgbouncerLogPoolerError := index (default dict .rules) "pgbouncerLogPoolerError" }}
+    {{ if (and $pgbouncerLogPoolerError (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgbouncerLogPoolerError.enabled $pgbouncerLogPoolerError.severity))) -}}
     - alert: PgBouncerLogPoolerErrorMessageCount
-      expr: pgbouncer_config_log_pooler_errors{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgbouncerLogPoolerError.val }}
-      for: {{ .rules.pgbouncerLogPoolerError.duration }}
+      expr: pgbouncer_config_log_pooler_errors{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ $pgbouncerLogPoolerError.val }}
+      for: {{ $pgbouncerLogPoolerError.duration }}
       labels:
-        severity: {{ .rules.pgbouncerLogPoolerError.severity }}
+        severity: {{ $pgbouncerLogPoolerError.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: PgBouncer backend error message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
@@ -73,23 +77,25 @@ spec:
   {{ if (include "pgbouncer-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgbouncer.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBpgbouncerPhaseNotReady
       expr: kubedb_com_pgbouncer_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB PgBouncer Phase NotReady (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})
         description: "KubeDB PgBouncer Phase not ready on {{`{{`}} $labels.pgbouncer {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "pgbouncer-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBPgBouncerPhaseCritical
       expr: kubedb_com_pgbouncer_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "pgbouncer-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB PgBouncer Phase Critical (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})

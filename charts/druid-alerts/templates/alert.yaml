@@ -21,93 +21,101 @@ spec:
   {{ if (include "druid-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: druid.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.druidDown.enabled .rules.druidDown.severity)) -}}
+    {{ $druidDown := index (default dict .rules) "druidDown" }}
+    {{ if (and $druidDown (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $druidDown.enabled $druidDown.severity))) -}}
     - alert: DruidDown
       expr: min(druid_service_heartbeat{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.druidDown.duration }}
+      for: {{ $druidDown.duration }}
       labels:
-        severity: {{ .rules.druidDown.severity }}
+        severity: {{ $druidDown.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Druid service down (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "One of the druid service is down for more than {{ .rules.druidDown.duration }} {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "One of the druid service is down for more than {{ $druidDown.duration }} {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zkDisconnected.enabled .rules.zkDisconnected.severity)) -}}
+    {{ $zkDisconnected := index (default dict .rules) "zkDisconnected" }}
+    {{ if (and $zkDisconnected (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $zkDisconnected.enabled $zkDisconnected.severity))) -}}
     - alert: ZKDisconnected
       expr: min(druid_zk_connected{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.zkDisconnected.duration }}
+      for: {{ $zkDisconnected.duration }}
       labels:
-        severity: {{ .rules.zkDisconnected.severity }}
+        severity: {{ $zkDisconnected.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ZooKeeper disconnected (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Druid lost connection to ZooKeeper {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highQueryTime.enabled .rules.highQueryTime.severity)) -}}
+    {{ $highQueryTime := index (default dict .rules) "highQueryTime" }}
+    {{ if (and $highQueryTime (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highQueryTime.enabled $highQueryTime.severity))) -}}
     - alert: HighQueryTime
       expr: max(max without(le) (druid_query_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",le="+Inf", pod=~".*historicals-0"} - on(dataSource, type) group_left(le) druid_query_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",le="1.0", pod=~".*historicals-0"})) > 0
-      for: {{ .rules.highQueryTime.duration }}
+      for: {{ $highQueryTime.duration }}
       labels:
-        severity: {{ .rules.highQueryTime.severity }}
+        severity: {{ $highQueryTime.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Query took more than 1 sec (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Druid took more than 1 second to complete a query  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highQueryWaitTime.enabled .rules.highQueryWaitTime.severity)) -}}
+    {{ $highQueryWaitTime := index (default dict .rules) "highQueryWaitTime" }}
+    {{ if (and $highQueryWaitTime (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highQueryWaitTime.enabled $highQueryWaitTime.severity))) -}}
     - alert: HighQueryWaitTime
       expr: druid_query_wait_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",pod=~".*historicals-0",le="+Inf"}- on() druid_query_wait_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",pod=~".*historicals-0",le="0.1"} > 0
-      for: {{ .rules.highQueryWaitTime.duration }}
+      for: {{ $highQueryWaitTime.duration }}
       labels:
-        severity: {{ .rules.highQueryWaitTime.severity }}
+        severity: {{ $highQueryWaitTime.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Took more than 1 sec on waiting for a segment scan. (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Druid spent more than 1 sec on waiting for a segment to be scanned.  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSegmentScanPending.enabled .rules.highSegmentScanPending.severity)) -}}
+    {{ $highSegmentScanPending := index (default dict .rules) "highSegmentScanPending" }}
+    {{ if (and $highSegmentScanPending (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highSegmentScanPending.enabled $highSegmentScanPending.severity))) -}}
     - alert: HighSegmentScanPending
-      expr: max(druid_segment_scan_pending{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ .rules.highSegmentScanPending.val }}
-      for: {{ .rules.highSegmentScanPending.duration }}
+      expr: max(druid_segment_scan_pending{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ $highSegmentScanPending.val }}
+      for: {{ $highSegmentScanPending.duration }}
       labels:
-        severity: {{ .rules.highSegmentScanPending.severity }}
+        severity: {{ $highSegmentScanPending.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High number of segments waiting in queue. (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{ .rules.highSegmentScanPending.val }} segments are in queue waiting to be scanned for more than {{ .rules.highSegmentScanPending.duration }}. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{ $highSegmentScanPending.val }} segments are in queue waiting to be scanned for more than {{ $highSegmentScanPending.duration }}. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSegmentUsage.enabled .rules.highSegmentUsage.severity)) -}}
+    {{ $highSegmentUsage := index (default dict .rules) "highSegmentUsage" }}
+    {{ if (and $highSegmentUsage (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highSegmentUsage.enabled $highSegmentUsage.severity))) -}}
     - alert: HighSegmentUsage
-      expr: max(druid_segment_usedpercent{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ .rules.highSegmentUsage.val }}
-      for: {{ .rules.highSegmentUsage.duration }}
+      expr: max(druid_segment_usedpercent{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ $highSegmentUsage.val }}
+      for: {{ $highSegmentUsage.duration }}
       labels:
-        severity: {{ .rules.highSegmentUsage.severity }}
+        severity: {{ $highSegmentUsage.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High space usage by served segments. (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{ .rules.highSegmentUsage.val }}% of space used by served segments. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{ $highSegmentUsage.val }}% of space used by served segments. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highJVMPoolUsage.enabled .rules.highJVMPoolUsage.severity)) -}}
+    {{ $highJVMPoolUsage := index (default dict .rules) "highJVMPoolUsage" }}
+    {{ if (and $highJVMPoolUsage (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highJVMPoolUsage.enabled $highJVMPoolUsage.severity))) -}}
     - alert: HighJVMPoolUsage
-      expr: max(druid_jvm_pool_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / on(pod, poolName) druid_jvm_pool_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ .rules.highJVMPoolUsage.val }}
-      for: {{ .rules.highJVMPoolUsage.duration }}
+      expr: max(druid_jvm_pool_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / on(pod, poolName) druid_jvm_pool_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ $highJVMPoolUsage.val }}
+      for: {{ $highJVMPoolUsage.duration }}
       labels:
-        severity: {{ .rules.highJVMPoolUsage.severity }}
+        severity: {{ $highJVMPoolUsage.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High JVM Pool is being used. (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{ .rules.highJVMPoolUsage.val }}% of JVM Pool is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{ $highJVMPoolUsage.val }}% of JVM Pool is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highJVMMemoryUsage.enabled .rules.highJVMMemoryUsage.severity)) -}}
+    {{ $highJVMMemoryUsage := index (default dict .rules) "highJVMMemoryUsage" }}
+    {{ if (and $highJVMMemoryUsage (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highJVMMemoryUsage.enabled $highJVMMemoryUsage.severity))) -}}
     - alert: HighJVMMemoryUsage
-      expr: max(druid_jvm_mem_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}/on(pod, memKind) druid_jvm_mem_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ .rules.highJVMMemoryUsage.val }}
-      for: {{ .rules.highJVMMemoryUsage.duration }}
+      expr: max(druid_jvm_mem_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}/on(pod, memKind) druid_jvm_mem_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ $highJVMMemoryUsage.val }}
+      for: {{ $highJVMMemoryUsage.duration }}
       labels:
-        severity: {{ .rules.highJVMMemoryUsage.severity }}
+        severity: {{ $highJVMMemoryUsage.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High JVM Memory is being used. (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{ .rules.highJVMMemoryUsage.val }}% of JVM Memory is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "More than {{ $highJVMMemoryUsage.val }}% of JVM Memory is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}
   {{end -}}
@@ -116,23 +124,25 @@ spec:
   {{ if (include "druid-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: druid.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBDruidPhaseNotReady
       expr: kubedb_com_druid_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Druid Phase NotReady (druid {{`{{`}} $labels.druid {{`}}`}})
         description: "KubeDB Druid Phase not ready on {{`{{`}} $labels.druid {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "druid-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBDruidPhaseCritical
       expr: kubedb_com_druid_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "druid-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Druid Phase Critical (druid {{`{{`}} $labels.druid {{`}}`}})

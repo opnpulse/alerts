@@ -21,51 +21,56 @@ spec:
   {{ if (include "hanadb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: hanadb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbInstanceDown.enabled .rules.hanadbInstanceDown.severity)) -}}
+    {{ $hanadbInstanceDown := index (default dict .rules) "hanadbInstanceDown" }}
+    {{ if (and $hanadbInstanceDown (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbInstanceDown.enabled $hanadbInstanceDown.severity))) -}}
     - alert: HanaDBInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.hanadbInstanceDown.duration }}
+      for: {{ $hanadbInstanceDown.duration }}
       labels:
-        severity: {{ .rules.hanadbInstanceDown.severity }}
+        severity: {{ $hanadbInstanceDown.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbServiceDown.enabled .rules.hanadbServiceDown.severity)) -}}
+    {{ $hanadbServiceDown := index (default dict .rules) "hanadbServiceDown" }}
+    {{ if (and $hanadbServiceDown (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbServiceDown.enabled $hanadbServiceDown.severity))) -}}
     - alert: HanaDBServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
-      for: {{ .rules.hanadbServiceDown.duration }}
+      for: {{ $hanadbServiceDown.duration }}
       labels:
-        severity: {{ .rules.hanadbServiceDown.severity }}
+        severity: {{ $hanadbServiceDown.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB service down
         description: "All HanaDB scrape targets are down\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbRestarted.enabled .rules.hanadbRestarted.severity)) -}}
+    {{ $hanadbRestarted := index (default dict .rules) "hanadbRestarted" }}
+    {{ if (and $hanadbRestarted (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbRestarted.enabled $hanadbRestarted.severity))) -}}
     - alert: HanaDBRestarted
-      expr: (time() - min(kube_pod_start_time{namespace="{{ $.Release.Namespace }}", pod=~"{{ $.Release.Name }}(-arbiter)?-.+"})) < {{ .rules.hanadbRestarted.val }}
-      for: {{ .rules.hanadbRestarted.duration }}
+      expr: (time() - min(kube_pod_start_time{namespace="{{ $.Release.Namespace }}", pod=~"{{ $.Release.Name }}(-arbiter)?-.+"})) < {{ $hanadbRestarted.val }}
+      for: {{ $hanadbRestarted.duration }}
       labels:
-        severity: {{ .rules.hanadbRestarted.severity }}
+        severity: {{ $hanadbRestarted.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB recently restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB pod {{`{{`}} $labels.pod {{`}}`}} restarted recently.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbHighCPUUsage.enabled .rules.hanadbHighCPUUsage.severity)) -}}
+    {{ $hanadbHighCPUUsage := index (default dict .rules) "hanadbHighCPUUsage" }}
+    {{ if (and $hanadbHighCPUUsage (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbHighCPUUsage.enabled $hanadbHighCPUUsage.severity))) -}}
     - alert: HanaDBHighCPUUsage
-      expr: avg by (pod) (hanadb_cpu_busy_percent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.hanadbHighCPUUsage.val }}
-      for: {{ .rules.hanadbHighCPUUsage.duration }}
+      expr: avg by (pod) (hanadb_cpu_busy_percent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ $hanadbHighCPUUsage.val }}
+      for: {{ $hanadbHighCPUUsage.duration }}
       labels:
-        severity: {{ .rules.hanadbHighCPUUsage.severity }}
+        severity: {{ $hanadbHighCPUUsage.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB CPU usage high (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "HanaDB CPU busy percentage is above {{ .rules.hanadbHighCPUUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "HanaDB CPU busy percentage is above {{ $hanadbHighCPUUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbHighMemoryUsage.enabled .rules.hanadbHighMemoryUsage.severity)) -}}
+    {{ $hanadbHighMemoryUsage := index (default dict .rules) "hanadbHighMemoryUsage" }}
+    {{ if (and $hanadbHighMemoryUsage (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbHighMemoryUsage.enabled $hanadbHighMemoryUsage.severity))) -}}
     - alert: HanaDBHighMemoryUsage
       expr: |
         100 * (
@@ -79,27 +84,29 @@ spec:
             ),
             1
           )
-        ) > {{ .rules.hanadbHighMemoryUsage.val }}
-      for: {{ .rules.hanadbHighMemoryUsage.duration }}
+        ) > {{ $hanadbHighMemoryUsage.val }}
+      for: {{ $hanadbHighMemoryUsage.duration }}
       labels:
-        severity: {{ .rules.hanadbHighMemoryUsage.severity }}
+        severity: {{ $hanadbHighMemoryUsage.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB memory usage high (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "HanaDB memory usage is above {{ .rules.hanadbHighMemoryUsage.val }} percent of allocation limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "HanaDB memory usage is above {{ $hanadbHighMemoryUsage.val }} percent of allocation limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbReplicationNotActive.enabled .rules.hanadbReplicationNotActive.severity)) -}}
+    {{ $hanadbReplicationNotActive := index (default dict .rules) "hanadbReplicationNotActive" }}
+    {{ if (and $hanadbReplicationNotActive (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $hanadbReplicationNotActive.enabled $hanadbReplicationNotActive.severity))) -}}
     - alert: HanaDBReplicationNotActive
       expr: max by (pod) (hanadb_sr_replication_status{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > 0
-      for: {{ .rules.hanadbReplicationNotActive.duration }}
+      for: {{ $hanadbReplicationNotActive.duration }}
       labels:
-        severity: {{ .rules.hanadbReplicationNotActive.severity }}
+        severity: {{ $hanadbReplicationNotActive.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: HanaDB replication is not active (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB system replication status is not ACTIVE.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: |
         100 * (
@@ -117,16 +124,17 @@ spec:
               namespace=~"{{ $.Release.Namespace }}"
             }
           )
-        ) > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        ) > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent volume usage is high
-        description: "Persistent volume usage is above {{ .rules.diskUsageHigh.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Persistent volume usage is above {{ $diskUsageHigh.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: |
         100 * (
@@ -144,14 +152,14 @@ spec:
               namespace=~"{{ $.Release.Namespace }}"
             }
           )
-        ) > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        ) > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent volume is almost full
-        description: "Persistent volume usage is above {{ .rules.diskAlmostFull.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Persistent volume usage is above {{ $diskAlmostFull.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ end -}}
@@ -160,23 +168,25 @@ spec:
   {{ if (include "hanadb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: hanadb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBHanaDBPhaseNotReady
       expr: kubedb_com_hanadb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB HanaDB Phase NotReady (hanadb {{`{{`}} $labels.app {{`}}`}})
         description: "KubeDB HanaDB phase is NotReady\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "hanadb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBHanaDBPhaseCritical
       expr: kubedb_com_hanadb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "hanadb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB HanaDB Phase Critical (hanadb {{`{{`}} $labels.app {{`}}`}})

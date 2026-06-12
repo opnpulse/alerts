@@ -21,125 +21,136 @@ spec:
   {{ if (include "vaultserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: vaultserver.vault.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultDown.enabled .rules.vaultDown.severity)) -}}
+    {{ $vaultDown := index (default dict .rules) "vaultDown" }}
+    {{ if (and $vaultDown (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultDown.enabled $vaultDown.severity))) -}}
     - alert: VaultDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.vaultDown.duration }}
+      for: {{ $vaultDown.duration }}
       labels:
-        severity: {{ .rules.vaultDown.severity }}
+        severity: {{ $vaultDown.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Vault instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Vault instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultSealed.enabled .rules.vaultSealed.severity)) -}}
+    {{ $vaultSealed := index (default dict .rules) "vaultSealed" }}
+    {{ if (and $vaultSealed (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultSealed.enabled $vaultSealed.severity))) -}}
     - alert: VaultSealed
       expr: vault_core_unsealed{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.vaultSealed.duration }}
+      for: {{ $vaultSealed.duration }}
       labels:
-        severity: {{ .rules.vaultSealed.severity }}
+        severity: {{ $vaultSealed.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultServer instance Sealed (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "VaultServer instance is sealed on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultAutoPilotNodeUnhealthy.enabled .rules.vaultAutoPilotNodeUnhealthy.severity)) -}}
+    {{ $vaultAutoPilotNodeUnhealthy := index (default dict .rules) "vaultAutoPilotNodeUnhealthy" }}
+    {{ if (and $vaultAutoPilotNodeUnhealthy (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultAutoPilotNodeUnhealthy.enabled $vaultAutoPilotNodeUnhealthy.severity))) -}}
     - alert: VaultAutopilotNodeUnhealthy
       expr: vault_autopilot_healthy{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < 1
-      for: {{ .rules.vaultAutoPilotNodeUnhealthy.duration }}
+      for: {{ $vaultAutoPilotNodeUnhealthy.duration }}
       labels:
-        severity: {{ .rules.vaultAutoPilotNodeUnhealthy.severity }}
+        severity: {{ $vaultAutoPilotNodeUnhealthy.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Autopilot Vault Raft node unhealthy (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "At least one of the Autopilot Vault Raft nodes is unhealthy on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultLeadershipLoss.enabled .rules.vaultLeadershipLoss.severity)) -}}
+    {{ $vaultLeadershipLoss := index (default dict .rules) "vaultLeadershipLoss" }}
+    {{ if (and $vaultLeadershipLoss (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultLeadershipLoss.enabled $vaultLeadershipLoss.severity))) -}}
     - alert: VaultLeadershipLoss
-      expr: sum(increase(vault_core_leadership_lost_count{job="{{- $app -}}-stats"}[1h])) > {{.rules.vaultLeadershipLoss.val}}
-      for: {{ .rules.vaultLeadershipLoss.duration }}
+      expr: sum(increase(vault_core_leadership_lost_count{job="{{- $app -}}-stats"}[1h])) > {{$vaultLeadershipLoss.val}}
+      for: {{ $vaultLeadershipLoss.duration }}
       labels:
-        severity: {{ .rules.vaultLeadershipLoss.severity }}
+        severity: {{ $vaultLeadershipLoss.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary:  High frequency of Vault leadership losses (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There have been more than 5 Vault leadership losses in the past 1h on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultLeadershipStepsDowns.enabled .rules.vaultLeadershipStepsDowns.severity)) -}}
+    {{ $vaultLeadershipStepsDowns := index (default dict .rules) "vaultLeadershipStepsDowns" }}
+    {{ if (and $vaultLeadershipStepsDowns (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultLeadershipStepsDowns.enabled $vaultLeadershipStepsDowns.severity))) -}}
     - alert: VaultLeadershipStepsDown
-      expr: sum(increase(vault_core_step_down_count{job="{{- $app -}}-stats"}[1h])) > {{.rules.vaultLeadershipStepsDowns.val}}
-      for: {{ .rules.vaultLeadershipStepsDowns.duration }}
+      expr: sum(increase(vault_core_step_down_count{job="{{- $app -}}-stats"}[1h])) > {{$vaultLeadershipStepsDowns.val}}
+      for: {{ $vaultLeadershipStepsDowns.duration }}
       labels:
-        severity: {{ .rules.vaultLeadershipStepsDowns.severity }}
+        severity: {{ $vaultLeadershipStepsDowns.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High frequency of Vault leadership steps down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There have been more than 5 Vault leadership steps down in the past 1h on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultLeadershipSetupFailures.enabled .rules.vaultLeadershipSetupFailures.severity)) -}}
+    {{ $vaultLeadershipSetupFailures := index (default dict .rules) "vaultLeadershipSetupFailures" }}
+    {{ if (and $vaultLeadershipSetupFailures (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultLeadershipSetupFailures.enabled $vaultLeadershipSetupFailures.severity))) -}}
     - alert: VaultLeadershipSetupFailures
-      expr: sum(increase(vault_core_leadership_setup_failed{job="{{- $app -}}-stats"}[1h])) > {{.rules.vaultLeadershipSetupFailures.val}}
-      for: {{ .rules.vaultLeadershipSetupFailures.duration }}
+      expr: sum(increase(vault_core_leadership_setup_failed{job="{{- $app -}}-stats"}[1h])) > {{$vaultLeadershipSetupFailures.val}}
+      for: {{ $vaultLeadershipSetupFailures.duration }}
       labels:
-        severity: {{ .rules.vaultLeadershipSetupFailures.severity }}
+        severity: {{ $vaultLeadershipSetupFailures.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High frequency of Vault leadership setup failures (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There have been more than 5 Vault leadership setup failures in the past 1h on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultRequestFailures.enabled .rules.vaultRequestFailures.severity)) -}}
+    {{ $vaultRequestFailures := index (default dict .rules) "vaultRequestFailures" }}
+    {{ if (and $vaultRequestFailures (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultRequestFailures.enabled $vaultRequestFailures.severity))) -}}
     - alert: VaultRequestFailures
       expr: increase(vault_audit_log_request_failure{job="{{- $app -}}-stats"}[5m]) > 0
-      for: {{ .rules.vaultRequestFailures.duration }}
+      for: {{ $vaultRequestFailures.duration }}
       labels:
-        severity: {{ .rules.vaultRequestFailures.severity }}
+        severity: {{ $vaultRequestFailures.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High frequency of failed Vault requests (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There has been an increased number of failed Vault requests in the last 15 minutes on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultResponseFailures.enabled .rules.vaultResponseFailures.severity)) -}}
+    {{ $vaultResponseFailures := index (default dict .rules) "vaultResponseFailures" }}
+    {{ if (and $vaultResponseFailures (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultResponseFailures.enabled $vaultResponseFailures.severity))) -}}
     - alert: VaultResponseFailures
       expr: increase(vault_audit_log_response_failure{job="{{- $app -}}-stats"}[5m]) > 0
-      for: {{ .rules.vaultResponseFailures.duration }}
+      for: {{ $vaultResponseFailures.duration }}
       labels:
-        severity: {{ .rules.vaultResponseFailures.severity }}
+        severity: {{ $vaultResponseFailures.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High frequency of failed Vault responses (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There has been an increased number of failed Vault response in the last 15 minutes on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.vaultTooManyInfinityTokens.enabled .rules.vaultTooManyInfinityTokens.severity)) -}}
+    {{ $vaultTooManyInfinityTokens := index (default dict .rules) "vaultTooManyInfinityTokens" }}
+    {{ if (and $vaultTooManyInfinityTokens (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $vaultTooManyInfinityTokens.enabled $vaultTooManyInfinityTokens.severity))) -}}
     - alert: VaultTooManyInfinityTokens
-      expr: vault_token_count_by_ttl{creation_ttl="+Inf",job="{{- $app -}}-stats"} > {{.rules.vaultTooManyInfinityTokens.val}}
-      for: {{ .rules.vaultTooManyInfinityTokens.duration }}
+      expr: vault_token_count_by_ttl{creation_ttl="+Inf",job="{{- $app -}}-stats"} > {{$vaultTooManyInfinityTokens.val}}
+      for: {{ $vaultTooManyInfinityTokens.duration }}
       labels:
-        severity: {{ .rules.vaultTooManyInfinityTokens.severity }}
+        severity: {{ $vaultTooManyInfinityTokens.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Vault too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Vault instance has too many infinity tokens . More than {{.rules.vaultTooManyInfinityTokens.val}} of VaultServer Infinity tokens are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Vault instance has too many infinity tokens . More than {{$vaultTooManyInfinityTokens.val}} of VaultServer Infinity tokens are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -153,23 +164,25 @@ spec:
   {{ if (include "vaultserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: vaultserver.operator.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeVaultServerPhaseNotReady
       expr: kubevault_com_vaultserver_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeVault VaultServer Phase NotReady (vaultserver {{`{{`}} $labels.vaultserver {{`}}`}})
         description: "KubeVault Vaultserver Phase not ready on {{`{{`}} $labels.vaultserver {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeVaultServerPhaseCritical
       expr: kubevault_com_vaultserver_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeVault VaultServer Phase Critical (vaultserver {{`{{`}} $labels.vaultserver {{`}}`}})
@@ -183,34 +196,37 @@ spec:
   {{ if (include "vaultserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: vaultserver.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ $opsRequestOnProgress := index (default dict .rules) "opsRequestOnProgress" }}
+    {{ if (and $opsRequestOnProgress (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestOnProgress.enabled $opsRequestOnProgress.severity))) -}}
     - alert: KubeVaultServerOpsRequestOnProgress
       expr: ops_kubevault_com_vaultopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestOnProgress.duration }}
+      for: {{ $opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .rules.opsRequestOnProgress.severity }}
+        severity: {{ $opsRequestOnProgress.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeVaultServerOpsRequest on progress (vaultopsrequest {{`{{`}} $labels.vaultopsrequest {{`}}`}})
         description: "VaultOpsRequest {{`{{`}} $labels.vaultopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ $opsRequestStatusProgressingToLong := index (default dict .rules) "opsRequestStatusProgressingToLong" }}
+    {{ if (and $opsRequestStatusProgressingToLong (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestStatusProgressingToLong.enabled $opsRequestStatusProgressingToLong.severity))) -}}
     - alert: KubeVaultServerOpsRequestStatusProgressingToLong
       expr: ops_kubevault_com_vaultopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      for: {{ $opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        severity: {{ $opsRequestStatusProgressingToLong.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultOpsRequest is in progressing status for too long (vaultopsrequest {{`{{`}} $labels.vaultopsrequest {{`}}`}})
         description: "VaultOpsRequest {{`{{`}} $labels.vaultopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ $opsRequestFailed := index (default dict .rules) "opsRequestFailed" }}
+    {{ if (and $opsRequestFailed (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $opsRequestFailed.enabled $opsRequestFailed.severity))) -}}
     - alert: KubeVaultServerOpsRequestFailed
       expr: ops_kubevault_com_vaultopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.opsRequestFailed.duration }}
+      for: {{ $opsRequestFailed.duration }}
       labels:
-        severity: {{ .rules.opsRequestFailed.severity }}
+        severity: {{ $opsRequestFailed.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultOpsRequest failed (vaultopsrequest {{`{{`}} $labels.vaultopsrequest {{`}}`}})
@@ -224,81 +240,88 @@ spec:
   {{ if (include "vaultserver-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: vaultserver.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ $backupSessionFailed := index (default dict .rules) "backupSessionFailed" }}
+    {{ if (and $backupSessionFailed (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionFailed.enabled $backupSessionFailed.severity))) -}}
     - alert: VaultServerStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.backupSessionFailed.duration }}
+      for: {{ $backupSessionFailed.duration }}
       labels:
-        severity: {{ .rules.backupSessionFailed.severity }}
+        severity: {{ $backupSessionFailed.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultServer Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ $restoreSessionFailed := index (default dict .rules) "restoreSessionFailed" }}
+    {{ if (and $restoreSessionFailed (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionFailed.enabled $restoreSessionFailed.severity))) -}}
     - alert: VaultServerStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.restoreSessionFailed.duration }}
+      for: {{ $restoreSessionFailed.duration }}
       labels:
-        severity: {{ .rules.restoreSessionFailed.severity }}
+        severity: {{ $restoreSessionFailed.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultServer Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ $noBackupSessionForTooLong := index (default dict .rules) "noBackupSessionForTooLong" }}
+    {{ if (and $noBackupSessionForTooLong (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $noBackupSessionForTooLong.enabled $noBackupSessionForTooLong.severity))) -}}
     - alert: VaultServerStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
-      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ $noBackupSessionForTooLong.val }}
+      for: {{ $noBackupSessionForTooLong.duration }}
       labels:
-        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        severity: {{ $noBackupSessionForTooLong.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: VaultServer Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: VaultServer Stash no backup for last {{ $noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ $repositoryCorrupted := index (default dict .rules) "repositoryCorrupted" }}
+    {{ if (and $repositoryCorrupted (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryCorrupted.enabled $repositoryCorrupted.severity))) -}}
     - alert: VaultServerStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.repositoryCorrupted.duration }}
+      for: {{ $repositoryCorrupted.duration }}
       labels:
-        severity: {{ .rules.repositoryCorrupted.severity }}
+        severity: {{ $repositoryCorrupted.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: VaultServer Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ $repositoryStorageRunningLow := index (default dict .rules) "repositoryStorageRunningLow" }}
+    {{ if (and $repositoryStorageRunningLow (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $repositoryStorageRunningLow.enabled $repositoryStorageRunningLow.severity))) -}}
     - alert: VaultServerStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
-      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $repositoryStorageRunningLow.val }}
+      for: {{ $repositoryStorageRunningLow.duration }}
       labels:
-        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        severity: {{ $repositoryStorageRunningLow.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: VaultServer Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: VaultServer Stash Repository storage more than {{ $repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ $backupSessionPeriodTooLong := index (default dict .rules) "backupSessionPeriodTooLong" }}
+    {{ if (and $backupSessionPeriodTooLong (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $backupSessionPeriodTooLong.enabled $backupSessionPeriodTooLong.severity))) -}}
     - alert: VaultServerStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
-      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $backupSessionPeriodTooLong.val }}
+      for: {{ $backupSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        severity: {{ $backupSessionPeriodTooLong.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  VaultServer Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  VaultServer Stash backup session took more than {{ $backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ $restoreSessionPeriodTooLong := index (default dict .rules) "restoreSessionPeriodTooLong" }}
+    {{ if (and $restoreSessionPeriodTooLong (include "vaultserver-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $restoreSessionPeriodTooLong.enabled $restoreSessionPeriodTooLong.severity))) -}}
     - alert: VaultServerStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
-      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ $restoreSessionPeriodTooLong.val }}
+      for: {{ $restoreSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        severity: {{ $restoreSessionPeriodTooLong.severity }}
         {{- include "vaultserver-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  VaultServer Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  VaultServer Stash restore session took more than {{ $restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "VaultServer Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

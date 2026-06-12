@@ -22,52 +22,56 @@ spec:
   {{ if (include "openfga-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: openfga.core.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.down.enabled .rules.down.severity)) -}}
+    {{ $down := index (default dict .rules) "down" }}
+    {{ if (and $down (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $down.enabled $down.severity))) -}}
     - alert: OpenFGADown
       expr: up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 0 or absent_over_time(up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])
-      for: {{ .rules.down.duration }}
+      for: {{ $down.duration }}
       labels:
-        severity: {{ .rules.down.severity }}
+        severity: {{ $down.severity }}
         {{- include "openfga-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: OpenFGA target is down or missing from Prometheus scrapes
         description: "Prometheus has not observed a healthy OpenFGA scrape target for job {{`{{`}} $labels.job {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}}."
     {{- end }}
-    {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highRequestLatency.enabled .rules.highRequestLatency.severity)) -}}
+    {{ $highRequestLatency := index (default dict .rules) "highRequestLatency" }}
+    {{ if (and $highRequestLatency (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highRequestLatency.enabled $highRequestLatency.severity))) -}}
     - alert: OpenFGAHighRequestLatency
-      expr: histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) by (grpc_method, le)) > {{ .rules.highRequestLatency.val }}
-      for: {{ .rules.highRequestLatency.duration }}
+      expr: histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) by (grpc_method, le)) > {{ $highRequestLatency.val }}
+      for: {{ $highRequestLatency.duration }}
       labels:
-        severity: {{ .rules.highRequestLatency.severity }}
+        severity: {{ $highRequestLatency.severity }}
         {{- include "openfga-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High p99 latency for OpenFGA method {{`{{`}} $labels.grpc_method {{`}}`}}
-        description: "OpenFGA p99 request latency for method {{`{{`}} $labels.grpc_method {{`}}`}} is above {{ .rules.highRequestLatency.val }}s."
+        description: "OpenFGA p99 request latency for method {{`{{`}} $labels.grpc_method {{`}}`}} is above {{ $highRequestLatency.val }}s."
     {{- end }}
-    {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highErrorRate.enabled .rules.highErrorRate.severity)) -}}
+    {{ $highErrorRate := index (default dict .rules) "highErrorRate" }}
+    {{ if (and $highErrorRate (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highErrorRate.enabled $highErrorRate.severity))) -}}
     - alert: OpenFGAHighErrorRate
-      expr: sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService",grpc_code!="OK"}[5m])) / sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) * 100 > {{ .rules.highErrorRate.val }}
-      for: {{ .rules.highErrorRate.duration }}
+      expr: sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService",grpc_code!="OK"}[5m])) / sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) * 100 > {{ $highErrorRate.val }}
+      for: {{ $highErrorRate.duration }}
       labels:
-        severity: {{ .rules.highErrorRate.severity }}
+        severity: {{ $highErrorRate.severity }}
         {{- include "openfga-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: High error rate in OpenFGA requests
-        description: "OpenFGA gRPC error rate is above {{ .rules.highErrorRate.val }}%."
+        description: "OpenFGA gRPC error rate is above {{ $highErrorRate.val }}%."
     {{- end }}
-    {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSQLConnections.enabled .rules.highSQLConnections.severity)) -}}
+    {{ $highSQLConnections := index (default dict .rules) "highSQLConnections" }}
+    {{ if (and $highSQLConnections (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $highSQLConnections.enabled $highSQLConnections.severity))) -}}
     - alert: OpenFGAHighSQLConnections
       expr: |
         go_sql_max_open_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > 0
         and
-        go_sql_open_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / go_sql_max_open_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100 > {{ .rules.highSQLConnections.val }}
-      for: {{ .rules.highSQLConnections.duration }}
+        go_sql_open_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / go_sql_max_open_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100 > {{ $highSQLConnections.val }}
+      for: {{ $highSQLConnections.duration }}
       labels:
-        severity: {{ .rules.highSQLConnections.severity }}
+        severity: {{ $highSQLConnections.severity }}
         {{- include "openfga-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: SQL connections nearing exhaustion in OpenFGA
-        description: "OpenFGA SQL open connections are above {{ .rules.highSQLConnections.val }}% of the configured maximum."
+        description: "OpenFGA SQL open connections are above {{ $highSQLConnections.val }}% of the configured maximum."
     {{- end }}
   {{ end -}}
   {{ end -}}

@@ -21,89 +21,97 @@ spec:
   {{ if (include "pgpool-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgpool.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolTooManyConnections.enabled .rules.pgpoolTooManyConnections.severity)) -}}
+    {{ $pgpoolTooManyConnections := index (default dict .rules) "pgpoolTooManyConnections" }}
+    {{ if (and $pgpoolTooManyConnections (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolTooManyConnections.enabled $pgpoolTooManyConnections.severity))) -}}
     - alert: PgpoolTooManyConnections
-      expr: (sum by (pod) (pgpool2_backend_by_process_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgpool2_backend_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ .rules.pgpoolTooManyConnections.val }}
-      for: {{ .rules.pgpoolTooManyConnections.duration }}
+      expr: (sum by (pod) (pgpool2_backend_by_process_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgpool2_backend_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ $pgpoolTooManyConnections.val }}
+      for: {{ $pgpoolTooManyConnections.duration }}
       labels:
-        severity: {{ .rules.pgpoolTooManyConnections.severity }}
+        severity: {{ $pgpoolTooManyConnections.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool too many connection usage (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Pgpool {{`{{`}} $labels.pod {{`}}`}} high connection usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolPostgresHealthCheckFailure.enabled .rules.pgpoolPostgresHealthCheckFailure.severity)) -}}
+    {{ $pgpoolPostgresHealthCheckFailure := index (default dict .rules) "pgpoolPostgresHealthCheckFailure" }}
+    {{ if (and $pgpoolPostgresHealthCheckFailure (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolPostgresHealthCheckFailure.enabled $pgpoolPostgresHealthCheckFailure.severity))) -}}
     - alert: PgpoolPostgresHealthCheckFailure
-      expr: pgpool2_pool_health_check_stats_fail_count{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolPostgresHealthCheckFailure.val }}
-      for: {{ .rules.pgpoolPostgresHealthCheckFailure.duration }}
+      expr: pgpool2_pool_health_check_stats_fail_count{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ $pgpoolPostgresHealthCheckFailure.val }}
+      for: {{ $pgpoolPostgresHealthCheckFailure.duration }}
       labels:
-        severity: {{ .rules.pgpoolPostgresHealthCheckFailure.severity }}
+        severity: {{ $pgpoolPostgresHealthCheckFailure.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool health check failed for backend PostgreSQL  (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Pgpool {{`{{`}} $labels.pod {{`}}`}}  health check failure for backend PosgreSQL {{`{{`}} $labels.role {{`}}`}} server\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolExporterLastScrapeError.enabled .rules.pgpoolExporterLastScrapeError.severity)) -}}
+    {{ $pgpoolExporterLastScrapeError := index (default dict .rules) "pgpoolExporterLastScrapeError" }}
+    {{ if (and $pgpoolExporterLastScrapeError (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolExporterLastScrapeError.enabled $pgpoolExporterLastScrapeError.severity))) -}}
     - alert: PgpoolExporterLastScrapeError
       expr: pgpool2_last_scrape_error{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.pgpoolExporterLastScrapeError.duration }}
+      for: {{ $pgpoolExporterLastScrapeError.duration }}
       labels:
-        severity: {{ .rules.pgpoolExporterLastScrapeError.severity }}
+        severity: {{ $pgpoolExporterLastScrapeError.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Pgpool exporter is showing errors.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendPanicMessageCount.enabled .rules.pgpoolBackendPanicMessageCount.severity)) -}}
+    {{ $pgpoolBackendPanicMessageCount := index (default dict .rules) "pgpoolBackendPanicMessageCount" }}
+    {{ if (and $pgpoolBackendPanicMessageCount (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolBackendPanicMessageCount.enabled $pgpoolBackendPanicMessageCount.severity))) -}}
     - alert: PgpoolBackendPanicMessageCount
-      expr: pgpool2_pool_backend_stats_panic_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendPanicMessageCount.val }}
-      for: {{ .rules.pgpoolBackendPanicMessageCount.duration }}
+      expr: pgpool2_pool_backend_stats_panic_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ $pgpoolBackendPanicMessageCount.val }}
+      for: {{ $pgpoolBackendPanicMessageCount.duration }}
       labels:
-        severity: {{ .rules.pgpoolBackendPanicMessageCount.severity }}
+        severity: {{ $pgpoolBackendPanicMessageCount.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool backend panic message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Panic messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendFatalMessageCount.enabled .rules.pgpoolBackendFatalMessageCount.severity)) -}}
+    {{ $pgpoolBackendFatalMessageCount := index (default dict .rules) "pgpoolBackendFatalMessageCount" }}
+    {{ if (and $pgpoolBackendFatalMessageCount (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolBackendFatalMessageCount.enabled $pgpoolBackendFatalMessageCount.severity))) -}}
     - alert: PgpoolBackendFatalMessageCount
-      expr: pgpool2_pool_backend_stats_fatal_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendFatalMessageCount.val }}
-      for: {{ .rules.pgpoolBackendPanicMessageCount.duration }}
+      expr: pgpool2_pool_backend_stats_fatal_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ $pgpoolBackendFatalMessageCount.val }}
+      for: {{ $pgpoolBackendFatalMessageCount.duration }}
       labels:
-        severity: {{ .rules.pgpoolBackendFatalMessageCount.severity }}
+        severity: {{ $pgpoolBackendFatalMessageCount.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool backend fatal message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Fatal messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendErrorMessageCount.enabled .rules.pgpoolBackendErrorMessageCount.severity)) -}}
+    {{ $pgpoolBackendErrorMessageCount := index (default dict .rules) "pgpoolBackendErrorMessageCount" }}
+    {{ if (and $pgpoolBackendErrorMessageCount (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolBackendErrorMessageCount.enabled $pgpoolBackendErrorMessageCount.severity))) -}}
     - alert: PgpoolBackendErrorMessageCount
-      expr: pgpool2_pool_backend_stats_error_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendErrorMessageCount.val }}
-      for: {{ .rules.pgpoolBackendErrorMessageCount.duration }}
+      expr: pgpool2_pool_backend_stats_error_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ $pgpoolBackendErrorMessageCount.val }}
+      for: {{ $pgpoolBackendErrorMessageCount.duration }}
       labels:
-        severity: {{ .rules.pgpoolBackendErrorMessageCount.severity }}
+        severity: {{ $pgpoolBackendErrorMessageCount.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool backend error message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Error messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolLowCacheMemory.enabled .rules.pgpoolLowCacheMemory.severity)) -}}
+    {{ $pgpoolLowCacheMemory := index (default dict .rules) "pgpoolLowCacheMemory" }}
+    {{ if (and $pgpoolLowCacheMemory (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolLowCacheMemory.enabled $pgpoolLowCacheMemory.severity))) -}}
     - alert: PgpoolLowCacheMemory
-      expr: pgpool2_pool_cache_free_cache_entries_size{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / 1000000 < {{ .rules.pgpoolLowCacheMemory.val }}
-      for: {{ .rules.pgpoolLowCacheMemory.duration }}
+      expr: pgpool2_pool_cache_free_cache_entries_size{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / 1000000 < {{ $pgpoolLowCacheMemory.val }}
+      for: {{ $pgpoolLowCacheMemory.duration }}
       labels:
-        severity: {{ .rules.pgpoolLowCacheMemory.severity }}
+        severity: {{ $pgpoolLowCacheMemory.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Low cache memory (instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Pgpool have low cache memory remaining {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolDown.enabled .rules.pgpoolDown.severity)) -}}
+    {{ $pgpoolDown := index (default dict .rules) "pgpoolDown" }}
+    {{ if (and $pgpoolDown (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $pgpoolDown.enabled $pgpoolDown.severity))) -}}
     - alert: PgpoolDown
       expr: pgpool2_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
-      for: {{ .rules.pgpoolDown.duration }}
+      for: {{ $pgpoolDown.duration }}
       labels:
-        severity: {{ .rules.pgpoolDown.severity }}
+        severity: {{ $pgpoolDown.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Pgpool instance down (instance {{`{{`}} $labels.pod {{`}}`}})
@@ -117,23 +125,25 @@ spec:
   {{ if (include "pgpool-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgpool.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBPgpoolPhaseNotReady
       expr: kubedb_com_pgpool_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Pgpool Phase NotReady (pgpool {{`{{`}} $labels.pgpool {{`}}`}})
         description: "KubeDB Pgpool Phase not ready on {{`{{`}} $labels.pgpool {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "pgpool-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBPgpoolPhaseCritical
       expr: kubedb_com_pgpool_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "pgpool-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB Pgpool Phase Critical (pgpool {{`{{`}} $labels.pgpool {{`}}`}})

@@ -366,6 +366,13 @@ ct: $(BUILD_DIRS)
 	        ct $(CT_COMMAND) --debug --validate-maintainers=false $(CT_ARGS) \
 	    "
 
+.PHONY: verify-helm-templates
+verify-helm-templates:
+	@for chart in charts/*; do \
+		echo "rendering $$chart"; \
+		helm template test "$$chart" >/dev/null || exit 1; \
+	done
+
 .PHONY: lint
 lint: $(BUILD_DIRS)
 	@echo "running linter"

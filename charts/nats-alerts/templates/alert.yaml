@@ -82,26 +82,28 @@ spec:
         )
     - record: nats:server_total_consumers:max_2m
       expr: max_over_time(nats:server_total_consumers:max[2m])
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsDown.enabled .rules.natsDown.severity)) }}
+    {{ $natsDown := index (default dict .rules) "natsDown" }}
+    {{ if (and $natsDown (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsDown.enabled $natsDown.severity))) -}}
     - alert: NatsDown
       expr: up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 0 or absent_over_time(up{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[2m])
-      for: {{ .rules.natsDown.duration }}
+      for: {{ $natsDown.duration }}
       labels:
-        severity: {{ .rules.natsDown.severity }}
+        severity: {{ $natsDown.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS target is down or missing from Prometheus scrapes"
         description: "Prometheus has not observed a healthy NATS scrape target for job {{`{{`}} $labels.job {{`}}`}} in namespace {{`{{`}} $labels.namespace {{`}}`}}."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsReplicasNotReady.enabled .rules.natsReplicasNotReady.severity)) }}
+    {{ $natsReplicasNotReady := index (default dict .rules) "natsReplicasNotReady" }}
+    {{ if (and $natsReplicasNotReady (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsReplicasNotReady.enabled $natsReplicasNotReady.severity))) -}}
     - alert: NatsReplicasNotReady
       expr: >-
         max(kube_statefulset_status_replicas_ready{namespace="{{ $.Release.Namespace }}",statefulset="{{ $app }}"})
         <
         max(kube_statefulset_replicas{namespace="{{ $.Release.Namespace }}",statefulset="{{ $app }}"})
-      for: {{ .rules.natsReplicasNotReady.duration }}
+      for: {{ $natsReplicasNotReady.duration }}
       labels:
-        severity: {{ .rules.natsReplicasNotReady.severity }}
+        severity: {{ $natsReplicasNotReady.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS StatefulSet has fewer ready replicas than desired"
@@ -113,27 +115,29 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.resourceUtilization.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighMemoryUsage.enabled .rules.natsJetStreamHighMemoryUsage.severity)) }}
+    {{ $natsJetStreamHighMemoryUsage := index (default dict .rules) "natsJetStreamHighMemoryUsage" }}
+    {{ if (and $natsJetStreamHighMemoryUsage (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamHighMemoryUsage.enabled $natsJetStreamHighMemoryUsage.severity))) -}}
     - alert: NatsJetStreamHighMemoryUsage
-      expr: (nats_varz_jetstream_stats_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighMemoryUsage.val }}
-      for: {{ .rules.natsJetStreamHighMemoryUsage.duration }}
+      expr: (nats_varz_jetstream_stats_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ $natsJetStreamHighMemoryUsage.val }}
+      for: {{ $natsJetStreamHighMemoryUsage.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamHighMemoryUsage.severity }}
+        severity: {{ $natsJetStreamHighMemoryUsage.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS JetStream high memory usage (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "JetStream memory usage is above {{ .rules.natsJetStreamHighMemoryUsage.val }}%."
+        description: "JetStream memory usage is above {{ $natsJetStreamHighMemoryUsage.val }}%."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighStorageUsage.enabled .rules.natsJetStreamHighStorageUsage.severity)) }}
+    {{ $natsJetStreamHighStorageUsage := index (default dict .rules) "natsJetStreamHighStorageUsage" }}
+    {{ if (and $natsJetStreamHighStorageUsage (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamHighStorageUsage.enabled $natsJetStreamHighStorageUsage.severity))) -}}
     - alert: NatsJetStreamHighStorageUsage
-      expr: (nats_varz_jetstream_stats_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighStorageUsage.val }}
-      for: {{ .rules.natsJetStreamHighStorageUsage.duration }}
+      expr: (nats_varz_jetstream_stats_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ $natsJetStreamHighStorageUsage.val }}
+      for: {{ $natsJetStreamHighStorageUsage.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamHighStorageUsage.severity }}
+        severity: {{ $natsJetStreamHighStorageUsage.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS JetStream high storage usage (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "JetStream storage usage is above {{ .rules.natsJetStreamHighStorageUsage.val }}%."
+        description: "JetStream storage usage is above {{ $natsJetStreamHighStorageUsage.val }}%."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -141,52 +145,56 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.consumerHealth.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighPendingMessages.enabled .rules.natsJetStreamHighPendingMessages.severity)) }}
+    {{ $natsJetStreamHighPendingMessages := index (default dict .rules) "natsJetStreamHighPendingMessages" }}
+    {{ if (and $natsJetStreamHighPendingMessages (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamHighPendingMessages.enabled $natsJetStreamHighPendingMessages.severity))) -}}
     - alert: NatsJetStreamHighPendingMessages
-      expr: nats:jetstream_consumer_num_pending:max_2m > {{ .rules.natsJetStreamHighPendingMessages.val }}
-      for: {{ .rules.natsJetStreamHighPendingMessages.duration }}
+      expr: nats:jetstream_consumer_num_pending:max_2m > {{ $natsJetStreamHighPendingMessages.val }}
+      for: {{ $natsJetStreamHighPendingMessages.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamHighPendingMessages.severity }}
+        severity: {{ $natsJetStreamHighPendingMessages.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "High number of pending messages for consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}}"
-        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ .rules.natsJetStreamHighPendingMessages.val }} pending messages."
+        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ $natsJetStreamHighPendingMessages.val }} pending messages."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighPendingMessagesWarning.enabled .rules.natsJetStreamHighPendingMessagesWarning.severity)) }}
+    {{ $natsJetStreamHighPendingMessagesWarning := index (default dict .rules) "natsJetStreamHighPendingMessagesWarning" }}
+    {{ if (and $natsJetStreamHighPendingMessagesWarning (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamHighPendingMessagesWarning.enabled $natsJetStreamHighPendingMessagesWarning.severity))) -}}
     - alert: NatsJetStreamHighPendingMessagesWarning
-      expr: nats:jetstream_consumer_num_pending:max_2m > {{ .rules.natsJetStreamHighPendingMessagesWarning.val }} and nats:jetstream_consumer_num_pending:max_2m <= {{ .rules.natsJetStreamHighPendingMessages.val }}
-      for: {{ .rules.natsJetStreamHighPendingMessagesWarning.duration }}
+      expr: nats:jetstream_consumer_num_pending:max_2m > {{ $natsJetStreamHighPendingMessagesWarning.val }} and nats:jetstream_consumer_num_pending:max_2m <= {{ dig "natsJetStreamHighPendingMessages" "val" 0 (default dict .rules) }}
+      for: {{ $natsJetStreamHighPendingMessagesWarning.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamHighPendingMessagesWarning.severity }}
+        severity: {{ $natsJetStreamHighPendingMessagesWarning.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "Warning: High number of pending messages for consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}}"
-        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ .rules.natsJetStreamHighPendingMessagesWarning.val }} pending messages."
+        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ $natsJetStreamHighPendingMessagesWarning.val }} pending messages."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighAckPending.enabled .rules.natsJetStreamHighAckPending.severity)) }}
+    {{ $natsJetStreamHighAckPending := index (default dict .rules) "natsJetStreamHighAckPending" }}
+    {{ if (and $natsJetStreamHighAckPending (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamHighAckPending.enabled $natsJetStreamHighAckPending.severity))) -}}
     - alert: NatsJetStreamHighAckPending
-      expr: nats:jetstream_consumer_num_ack_pending:max_2m > {{ .rules.natsJetStreamHighAckPending.val }}
-      for: {{ .rules.natsJetStreamHighAckPending.duration }}
+      expr: nats:jetstream_consumer_num_ack_pending:max_2m > {{ $natsJetStreamHighAckPending.val }}
+      for: {{ $natsJetStreamHighAckPending.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamHighAckPending.severity }}
+        severity: {{ $natsJetStreamHighAckPending.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "High number of unacknowledged messages for consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}}"
-        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ .rules.natsJetStreamHighAckPending.val }} messages pending acknowledgement."
+        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ $natsJetStreamHighAckPending.val }} messages pending acknowledgement."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamBacklogNoProgress.enabled .rules.natsJetStreamBacklogNoProgress.severity)) }}
+    {{ $natsJetStreamBacklogNoProgress := index (default dict .rules) "natsJetStreamBacklogNoProgress" }}
+    {{ if (and $natsJetStreamBacklogNoProgress (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamBacklogNoProgress.enabled $natsJetStreamBacklogNoProgress.severity))) -}}
     - alert: NatsJetStreamBacklogNoProgress
       expr: >-
-        nats:jetstream_consumer_num_pending:max_2m > {{ .rules.natsJetStreamBacklogNoProgress.val }}
+        nats:jetstream_consumer_num_pending:max_2m > {{ $natsJetStreamBacklogNoProgress.val }}
         and on ({{ $natsConsumerLabels }})
         nats:jetstream_consumer_delivered_progress_10m:max_2m == 0
-      for: {{ .rules.natsJetStreamBacklogNoProgress.duration }}
+      for: {{ $natsJetStreamBacklogNoProgress.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamBacklogNoProgress.severity }}
+        severity: {{ $natsJetStreamBacklogNoProgress.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "Consumer backlog is not draining for {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}}"
-        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ .rules.natsJetStreamBacklogNoProgress.val }} pending messages and no delivery progress over the last 10 minutes."
+        description: "Consumer {{`{{`}} $labels.consumer_name {{`}}`}} on stream {{`{{`}} $labels.stream_name {{`}}`}} has more than {{ $natsJetStreamBacklogNoProgress.val }} pending messages and no delivery progress over the last 10 minutes."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -194,33 +202,35 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.streamPerformance.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamNearMessageLimit.enabled .rules.natsJetStreamNearMessageLimit.severity)) }}
+    {{ $natsJetStreamNearMessageLimit := index (default dict .rules) "natsJetStreamNearMessageLimit" }}
+    {{ if (and $natsJetStreamNearMessageLimit (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamNearMessageLimit.enabled $natsJetStreamNearMessageLimit.severity))) -}}
     - alert: NatsJetStreamNearMessageLimit
       expr: >-
-        ((nats:jetstream_stream_total_messages:max_2m / nats:jetstream_stream_limit_messages:max_2m) * 100) > {{ .rules.natsJetStreamNearMessageLimit.val }}
+        ((nats:jetstream_stream_total_messages:max_2m / nats:jetstream_stream_limit_messages:max_2m) * 100) > {{ $natsJetStreamNearMessageLimit.val }}
         and on ({{ $natsStreamLabels }})
         nats:jetstream_stream_limit_messages:max_2m > 0
-      for: {{ .rules.natsJetStreamNearMessageLimit.duration }}
+      for: {{ $natsJetStreamNearMessageLimit.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamNearMessageLimit.severity }}
+        severity: {{ $natsJetStreamNearMessageLimit.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is nearing its message limit"
-        description: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is above {{ .rules.natsJetStreamNearMessageLimit.val }}% of its configured message limit."
+        description: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is above {{ $natsJetStreamNearMessageLimit.val }}% of its configured message limit."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamNearByteLimit.enabled .rules.natsJetStreamNearByteLimit.severity)) }}
+    {{ $natsJetStreamNearByteLimit := index (default dict .rules) "natsJetStreamNearByteLimit" }}
+    {{ if (and $natsJetStreamNearByteLimit (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamNearByteLimit.enabled $natsJetStreamNearByteLimit.severity))) -}}
     - alert: NatsJetStreamNearByteLimit
       expr: >-
-        ((nats:jetstream_stream_total_bytes:max_2m / nats:jetstream_stream_limit_bytes:max_2m) * 100) > {{ .rules.natsJetStreamNearByteLimit.val }}
+        ((nats:jetstream_stream_total_bytes:max_2m / nats:jetstream_stream_limit_bytes:max_2m) * 100) > {{ $natsJetStreamNearByteLimit.val }}
         and on ({{ $natsStreamLabels }})
         nats:jetstream_stream_limit_bytes:max_2m > 0
-      for: {{ .rules.natsJetStreamNearByteLimit.duration }}
+      for: {{ $natsJetStreamNearByteLimit.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamNearByteLimit.severity }}
+        severity: {{ $natsJetStreamNearByteLimit.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is nearing its byte limit"
-        description: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is above {{ .rules.natsJetStreamNearByteLimit.val }}% of its configured byte limit."
+        description: "Stream {{`{{`}} $labels.stream_name {{`}}`}} is above {{ $natsJetStreamNearByteLimit.val }}% of its configured byte limit."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -228,54 +238,58 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.connectivity.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamDisabled.enabled .rules.natsJetStreamDisabled.severity)) }}
+    {{ $natsJetStreamDisabled := index (default dict .rules) "natsJetStreamDisabled" }}
+    {{ if (and $natsJetStreamDisabled (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsJetStreamDisabled.enabled $natsJetStreamDisabled.severity))) -}}
     - alert: NatsJetStreamDisabled
       expr: nats_server_jetstream_disabled{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.natsJetStreamDisabled.duration }}
+      for: {{ $natsJetStreamDisabled.duration }}
       labels:
-        severity: {{ .rules.natsJetStreamDisabled.severity }}
+        severity: {{ $natsJetStreamDisabled.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "JetStream is disabled on NATS server {{`{{`}} $labels.server_name {{`}}`}}"
         description: "JetStream is disabled on server {{`{{`}} $labels.server_name {{`}}`}}."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSlowConsumers.enabled .rules.natsSlowConsumers.severity)) }}
+    {{ $natsSlowConsumers := index (default dict .rules) "natsSlowConsumers" }}
+    {{ if (and $natsSlowConsumers (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsSlowConsumers.enabled $natsSlowConsumers.severity))) -}}
     - alert: NatsSlowConsumers
       expr: >-
         sum by (namespace, job, pod, server_id, server_name) (
           increase(nats_varz_slow_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
-        ) >= {{ .rules.natsSlowConsumers.val }}
-      for: {{ .rules.natsSlowConsumers.duration }}
+        ) >= {{ $natsSlowConsumers.val }}
+      for: {{ $natsSlowConsumers.duration }}
       labels:
-        severity: {{ .rules.natsSlowConsumers.severity }}
+        severity: {{ $natsSlowConsumers.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} is seeing slow consumers"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported slow-consumer disconnections in the last 10 minutes."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsStalledClients.enabled .rules.natsStalledClients.severity)) }}
+    {{ $natsStalledClients := index (default dict .rules) "natsStalledClients" }}
+    {{ if (and $natsStalledClients (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsStalledClients.enabled $natsStalledClients.severity))) -}}
     - alert: NatsStalledClients
       expr: >-
         sum by (namespace, job, pod, server_id, server_name) (
           increase(nats_varz_stalled_clients{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
-        ) >= {{ .rules.natsStalledClients.val }}
-      for: {{ .rules.natsStalledClients.duration }}
+        ) >= {{ $natsStalledClients.val }}
+      for: {{ $natsStalledClients.duration }}
       labels:
-        severity: {{ .rules.natsStalledClients.severity }}
+        severity: {{ $natsStalledClients.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stalled clients"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stalled-client events in the last 10 minutes."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsStaleConnections.enabled .rules.natsStaleConnections.severity)) }}
+    {{ $natsStaleConnections := index (default dict .rules) "natsStaleConnections" }}
+    {{ if (and $natsStaleConnections (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsStaleConnections.enabled $natsStaleConnections.severity))) -}}
     - alert: NatsStaleConnections
       expr: >-
         sum by (namespace, job, pod, server_id, server_name) (
           increase(nats_varz_stale_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
-        ) >= {{ .rules.natsStaleConnections.val }}
-      for: {{ .rules.natsStaleConnections.duration }}
+        ) >= {{ $natsStaleConnections.val }}
+      for: {{ $natsStaleConnections.duration }}
       labels:
-        severity: {{ .rules.natsStaleConnections.severity }}
+        severity: {{ $natsStaleConnections.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stale connections"
@@ -298,16 +312,17 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.consumerManagement.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighTotalConsumers.enabled .rules.natsHighTotalConsumers.severity)) }}
+    {{ $natsHighTotalConsumers := index (default dict .rules) "natsHighTotalConsumers" }}
+    {{ if (and $natsHighTotalConsumers (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsHighTotalConsumers.enabled $natsHighTotalConsumers.severity))) -}}
     - alert: NatsHighTotalConsumers
-      expr: nats:server_total_consumers:max_2m > {{ .rules.natsHighTotalConsumers.val }}
-      for: {{ .rules.natsHighTotalConsumers.duration }}
+      expr: nats:server_total_consumers:max_2m > {{ $natsHighTotalConsumers.val }}
+      for: {{ $natsHighTotalConsumers.duration }}
       labels:
-        severity: {{ .rules.natsHighTotalConsumers.severity }}
+        severity: {{ $natsHighTotalConsumers.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "High total consumers"
-        description: "Total consumers are above {{ .rules.natsHighTotalConsumers.val }}."
+        description: "Total consumers are above {{ $natsHighTotalConsumers.val }}."
 {{- end }}
 {{- end }}
 {{- end }}

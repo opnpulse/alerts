@@ -21,102 +21,111 @@ spec:
   {{ if (include "solr-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: solr.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrDownShards.enabled .rules.solrDownShards.severity)) -}}
+    {{ $solrDownShards := index (default dict .rules) "solrDownShards" }}
+    {{ if (and $solrDownShards (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrDownShards.enabled $solrDownShards.severity))) -}}
     - alert: SolrDownShards
       expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="down"})) OR on() vector(0) != 0
-      for: {{ .rules.solrDownShards.duration }}
+      for: {{ $solrDownShards.duration }}
       labels:
-        severity: {{ .rules.solrDownShards.severity }}
+        severity: {{ $solrDownShards.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr shards down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr shards down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrRecoveryFailedShards.enabled .rules.solrRecoveryFailedShards.severity)) -}}
+    {{ $solrRecoveryFailedShards := index (default dict .rules) "solrRecoveryFailedShards" }}
+    {{ if (and $solrRecoveryFailedShards (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrRecoveryFailedShards.enabled $solrRecoveryFailedShards.severity))) -}}
     - alert: SolrRecoveryFailedShards
       expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="recovery_failed"})) OR on() vector(0) != 0
-      for: {{ .rules.solrRecoveryFailedShards.duration }}
+      for: {{ $solrRecoveryFailedShards.duration }}
       labels:
-        severity: {{ .rules.solrRecoveryFailedShards.severity }}
+        severity: {{ $solrRecoveryFailedShards.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr shards recovery failed (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr shard recovery failed on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrHighThreadRunning.enabled .rules.solrHighThreadRunning.severity)) -}}
+    {{ $solrHighThreadRunning := index (default dict .rules) "solrHighThreadRunning" }}
+    {{ if (and $solrHighThreadRunning (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrHighThreadRunning.enabled $solrHighThreadRunning.severity))) -}}
     - alert: SolrHighThreadRunning
-      expr: solr_metrics_jvm_threads{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighThreadRunning.val }}
-      for: {{ .rules.solrHighThreadRunning.duration }}
+      expr: solr_metrics_jvm_threads{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ $solrHighThreadRunning.val }}
+      for: {{ $solrHighThreadRunning.duration }}
       labels:
-        severity: {{ .rules.solrHighThreadRunning.severity }}
+        severity: {{ $solrHighThreadRunning.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr high thread running (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr high thread running on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrHighPoolSize.enabled .rules.solrHighPoolSize.severity)) -}}
+    {{ $solrHighPoolSize := index (default dict .rules) "solrHighPoolSize" }}
+    {{ if (and $solrHighPoolSize (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrHighPoolSize.enabled $solrHighPoolSize.severity))) -}}
     - alert: SolrHighPoolSize
-      expr: solr_metrics_jvm_memory_pools_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighPoolSize.val }}
-      for: {{ .rules.solrHighPoolSize.duration }}
+      expr: solr_metrics_jvm_memory_pools_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ $solrHighPoolSize.val }}
+      for: {{ $solrHighPoolSize.duration }}
       labels:
-        severity: {{ .rules.solrHighPoolSize.severity }}
+        severity: {{ $solrHighPoolSize.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr high pool size (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr high pool size {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrHighQPS.enabled .rules.solrHighQPS.severity)) -}}
+    {{ $solrHighQPS := index (default dict .rules) "solrHighQPS" }}
+    {{ if (and $solrHighQPS (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrHighQPS.enabled $solrHighQPS.severity))) -}}
     - alert: SolrHighQPS
-      expr: sum by (collection) (solr_metrics_core_query_1minRate{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) > {{ .rules.solrHighQPS.val }}
-      for: {{ .rules.solrHighQPS.duration }}
+      expr: sum by (collection) (solr_metrics_core_query_1minRate{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) > {{ $solrHighQPS.val }}
+      for: {{ $solrHighQPS.duration }}
       labels:
-        severity: {{ .rules.solrHighQPS.severity }}
+        severity: {{ $solrHighQPS.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr high QPS (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr high QPS {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrHighHeapSize.enabled .rules.solrHighHeapSize.severity)) -}}
+    {{ $solrHighHeapSize := index (default dict .rules) "solrHighHeapSize" }}
+    {{ if (and $solrHighHeapSize (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrHighHeapSize.enabled $solrHighHeapSize.severity))) -}}
     - alert: SolrHighHeapSize
-      expr: solr_metrics_jvm_memory_heap_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighHeapSize.val }}
-      for: {{ .rules.solrHighHeapSize.duration }}
+      expr: solr_metrics_jvm_memory_heap_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ $solrHighHeapSize.val }}
+      for: {{ $solrHighHeapSize.duration }}
       labels:
-        severity: {{ .rules.solrHighHeapSize.severity }}
+        severity: {{ $solrHighHeapSize.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr high heap size (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr high heap size {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.solrHighBufferSize.enabled .rules.solrHighBufferSize.severity)) -}}
+    {{ $solrHighBufferSize := index (default dict .rules) "solrHighBufferSize" }}
+    {{ if (and $solrHighBufferSize (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $solrHighBufferSize.enabled $solrHighBufferSize.severity))) -}}
     - alert: SolrHighBufferSize
-      expr: solr_metrics_jvm_buffers_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighBufferSize.val }}
-      for: {{ .rules.solrHighBufferSize.duration }}
+      expr: solr_metrics_jvm_buffers_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ $solrHighBufferSize.val }}
+      for: {{ $solrHighBufferSize.duration }}
       labels:
-        severity: {{ .rules.solrHighBufferSize.severity }}
+        severity: {{ $solrHighBufferSize.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Solr high buffer size (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Solr high buffer size {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
+    {{ if (and $diskUsageHigh (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskUsageHigh.enabled $diskUsageHigh.severity))) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        * 100 > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
+        severity: {{ $diskUsageHigh.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ $diskAlmostFull := index (default dict .rules) "diskAlmostFull" }}
+    {{ if (and $diskAlmostFull (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $diskAlmostFull.enabled $diskAlmostFull.severity))) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        * 100 > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
+        severity: {{ $diskAlmostFull.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
@@ -129,23 +138,25 @@ spec:
   {{ if (include "solr-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: solr.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ $appPhaseNotReady := index (default dict .rules) "appPhaseNotReady" }}
+    {{ if (and $appPhaseNotReady (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseNotReady.enabled $appPhaseNotReady.severity))) -}}
     - alert: KubeDBSolrPhaseNotReady
       expr: kubedb_com_solr_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseNotReady.duration }}
+      for: {{ $appPhaseNotReady.duration }}
       labels:
-        severity: {{ .rules.appPhaseNotReady.severity }}
+        severity: {{ $appPhaseNotReady.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB solr Phase NotReady (solr {{`{{`}} $labels.solr {{`}}`}})
         description: "KubeDB solr Phase not ready on {{`{{`}} $labels.solr {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ $appPhaseCritical := index (default dict .rules) "appPhaseCritical" }}
+    {{ if (and $appPhaseCritical (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $appPhaseCritical.enabled $appPhaseCritical.severity))) -}}
     - alert: KubeDBSolrPhaseCritical
       expr: kubedb_com_solr_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
-      for: {{ .rules.appPhaseCritical.duration }}
+      for: {{ $appPhaseCritical.duration }}
       labels:
-        severity: {{ .rules.appPhaseCritical.severity }}
+        severity: {{ $appPhaseCritical.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB solr Phase Critical (solr {{`{{`}} $labels.solr {{`}}`}})
