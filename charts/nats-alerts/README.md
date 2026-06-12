@@ -106,11 +106,11 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.groups.connectivity.rules.natsJetStreamDisabled.duration                     |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsJetStreamDisabled.severity                     |                                               | <code>critical</code>                            |
 | form.alert.groups.connectivity.rules.natsSlowConsumers.enabled                          |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsSlowConsumers.duration                         |                                               | <code>"5m"</code>                                |
+| form.alert.groups.connectivity.rules.natsSlowConsumers.duration                         |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsSlowConsumers.severity                         |                                               | <code>warning</code>                             |
 | form.alert.groups.connectivity.rules.natsSlowConsumers.val                              |                                               | <code>5</code>                                   |
 | form.alert.groups.connectivity.rules.natsStalledClients.enabled                         |                                               | <code>true</code>                                |
-| form.alert.groups.connectivity.rules.natsStalledClients.duration                        |                                               | <code>"5m"</code>                                |
+| form.alert.groups.connectivity.rules.natsStalledClients.duration                        |                                               | <code>"2m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStalledClients.severity                        |                                               | <code>warning</code>                             |
 | form.alert.groups.connectivity.rules.natsStalledClients.val                             |                                               | <code>5</code>                                   |
 | form.alert.groups.connectivity.rules.natsStaleConnections.enabled                       |                                               | <code>true</code>                                |
