@@ -51,20 +51,6 @@ form:
             duration: "5m"
             val: 95
             severity: critical
-          postgresNotEnoughConnections:
-            enabled: true
-            duration: "2m"
-            val: 5
-            severity: warning
-          postgresSlowQueries:
-            enabled: true
-            duration: "2m"
-            severity: warning
-          postgresReplicationLag:
-            enabled: true
-            duration: "0m"
-            val: 30s
-            severity: critical
           postgresHighRollbackRate:
             enabled: true
             duration: "5m"

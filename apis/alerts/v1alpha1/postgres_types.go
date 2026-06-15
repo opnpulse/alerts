@@ -82,9 +82,6 @@ type PostgresDatabaseAlertRules struct {
 	PostgresRestarted                  IntValAlert         `json:"postgresRestarted"`
 	PostgresExporterError              FixedAlert          `json:"postgresExporterError"`
 	PostgresTooManyConnections         IntValAlert         `json:"postgresTooManyConnections"`
-	PostgresNotEnoughConnections       IntValAlert         `json:"postgresNotEnoughConnections"`
-	PostgresSlowQueries                FixedAlert          `json:"postgresSlowQueries"`
-	PostgresReplicationLag             StringValAlert      `json:"postgresReplicationLag"`
 	PostgresHighRollbackRate           FloatValAlertConfig `json:"postgresHighRollbackRate"`
 	PostgresSplitBrain                 FixedAlert          `json:"postgresSplitBrain"`
 	PostgresTooManyLocksAcquired       FloatValAlertConfig `json:"postgresTooManyLocksAcquired"`

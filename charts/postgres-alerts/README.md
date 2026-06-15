@@ -73,17 +73,6 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.groups.database.rules.postgresTooManyConnections.duration          |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.postgresTooManyConnections.val               |                                               | <code>95</code>                                  |
 | form.alert.groups.database.rules.postgresTooManyConnections.severity          |                                               | <code>critical</code>                            |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.enabled         |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.duration        |                                               | <code>"2m"</code>                                |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.val             |                                               | <code>5</code>                                   |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.severity        |                                               | <code>warning</code>                             |
-| form.alert.groups.database.rules.postgresSlowQueries.enabled                  |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresSlowQueries.duration                 |                                               | <code>"2m"</code>                                |
-| form.alert.groups.database.rules.postgresSlowQueries.severity                 |                                               | <code>warning</code>                             |
-| form.alert.groups.database.rules.postgresReplicationLag.enabled               |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresReplicationLag.duration              |                                               | <code>"0m"</code>                                |
-| form.alert.groups.database.rules.postgresReplicationLag.val                   |                                               | <code>30s</code>                                 |
-| form.alert.groups.database.rules.postgresReplicationLag.severity              |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresHighRollbackRate.enabled             |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.duration            |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.val                 |                                               | <code>0.05</code>                                |

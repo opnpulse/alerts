@@ -67,10 +67,6 @@ The following table lists the configurable parameters of the `b3-alerts` chart a
 | form.alert.groups.process.rules.b3ReplicasNotReady.enabled                  |             | <code>true</code>                                |
 | form.alert.groups.process.rules.b3ReplicasNotReady.duration                 |             | <code>"15m"</code>                               |
 | form.alert.groups.process.rules.b3ReplicasNotReady.severity                 |             | <code>critical</code>                            |
-| form.alert.groups.process.rules.b3HighGoroutineCount.enabled                |             | <code>true</code>                                |
-| form.alert.groups.process.rules.b3HighGoroutineCount.duration               |             | <code>"10m"</code>                               |
-| form.alert.groups.process.rules.b3HighGoroutineCount.severity               |             | <code>warning</code>                             |
-| form.alert.groups.process.rules.b3HighGoroutineCount.val                    |             | <code>10000</code>                               |
 | form.alert.groups.process.rules.b3HighGcPauseDuration.enabled               |             | <code>true</code>                                |
 | form.alert.groups.process.rules.b3HighGcPauseDuration.duration              |             | <code>"5m"</code>                                |
 | form.alert.groups.process.rules.b3HighGcPauseDuration.severity              |             | <code>warning</code>                             |
@@ -88,10 +84,6 @@ The following table lists the configurable parameters of the `b3-alerts` chart a
 | form.alert.groups.http.rules.b3HighHttpLatency.duration                     |             | <code>"5m"</code>                                |
 | form.alert.groups.http.rules.b3HighHttpLatency.severity                     |             | <code>warning</code>                             |
 | form.alert.groups.http.rules.b3HighHttpLatency.val                          |             | <code>1</code>                                   |
-| form.alert.groups.http.rules.b3HighActiveRequests.enabled                   |             | <code>true</code>                                |
-| form.alert.groups.http.rules.b3HighActiveRequests.duration                  |             | <code>"5m"</code>                                |
-| form.alert.groups.http.rules.b3HighActiveRequests.severity                  |             | <code>warning</code>                             |
-| form.alert.groups.http.rules.b3HighActiveRequests.val                       |             | <code>1000</code>                                |
 | form.alert.groups.database.enabled                                          |             | <code>warning</code>                             |
 | form.alert.groups.database.rules.b3HighDatabaseErrorRate.enabled            |             | <code>true</code>                                |
 | form.alert.groups.database.rules.b3HighDatabaseErrorRate.duration           |             | <code>"5m"</code>                                |
@@ -110,14 +102,7 @@ The following table lists the configurable parameters of the `b3-alerts` chart a
 | form.alert.groups.database.rules.b3HighDatabaseConnectionPoolUsage.severity |             | <code>warning</code>                             |
 | form.alert.groups.database.rules.b3HighDatabaseConnectionPoolUsage.val      |             | <code>80</code>                                  |
 | form.alert.groups.auth.enabled                                              |             | <code>warning</code>                             |
-| form.alert.groups.auth.rules.b3HighAuthFailureRate.enabled                  |             | <code>true</code>                                |
-| form.alert.groups.auth.rules.b3HighAuthFailureRate.duration                 |             | <code>"5m"</code>                                |
-| form.alert.groups.auth.rules.b3HighAuthFailureRate.severity                 |             | <code>warning</code>                             |
-| form.alert.groups.auth.rules.b3HighAuthFailureRate.val                      |             | <code>10</code>                                  |
-| form.alert.groups.auth.rules.b3HighAuthzDenialRate.enabled                  |             | <code>true</code>                                |
-| form.alert.groups.auth.rules.b3HighAuthzDenialRate.duration                 |             | <code>"5m"</code>                                |
-| form.alert.groups.auth.rules.b3HighAuthzDenialRate.severity                 |             | <code>warning</code>                             |
-| form.alert.groups.auth.rules.b3HighAuthzDenialRate.val                      |             | <code>10</code>                                  |
+| form.alert.groups.auth.rules                                                |             | <code></code>                                    |
 | form.alert.groups.storage.enabled                                           |             | <code>warning</code>                             |
 | form.alert.groups.storage.rules.b3HighBlobStorageErrorRate.enabled          |             | <code>true</code>                                |
 | form.alert.groups.storage.rules.b3HighBlobStorageErrorRate.duration         |             | <code>"5m"</code>                                |

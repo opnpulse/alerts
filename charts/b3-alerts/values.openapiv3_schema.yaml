@@ -20,24 +20,6 @@ properties:
             type: string
           groups:
             properties:
-              auth:
-                description: Authentication/Authorization alerts
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                    required:
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
               database:
                 description: Database alerts
                 properties:
@@ -400,7 +382,6 @@ properties:
                 - rules
                 type: object
             required:
-            - auth
             - database
             - http
             - process
