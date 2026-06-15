@@ -186,7 +186,6 @@ properties:
                         - severity
                         - val
                         type: object
-<<<<<<< HEAD
                       postgresSlowQueries:
                         properties:
                           duration:
@@ -207,8 +206,6 @@ properties:
                         - severity
                         - val
                         type: object
-=======
->>>>>>> 983eddd8 (Remove unused types/values and run `make gen manifests fmt`)
                       postgresSplitBrain:
                         properties:
                           duration:
@@ -276,6 +273,7 @@ properties:
                     - postgresHighRollbackRate
                     - postgresInstanceDown
                     - postgresRestarted
+                    - postgresSlowQueries
                     - postgresSplitBrain
                     - postgresTooManyConnections
                     - postgresTooManyLocksAcquired
