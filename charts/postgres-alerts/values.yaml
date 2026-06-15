@@ -51,11 +51,14 @@ form:
             duration: "5m"
             val: 95
             severity: critical
+<<<<<<< HEAD
           postgresSlowQueries:
             enabled: true
             duration: "1m"
             val: 60
             severity: warning
+=======
+>>>>>>> 983eddd8 (Remove unused types/values and run `make gen manifests fmt`)
           postgresHighRollbackRate:
             enabled: true
             duration: "5m"

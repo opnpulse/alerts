@@ -102,10 +102,14 @@ The following table lists the configurable parameters of the `b3-alerts` chart a
 | form.alert.groups.database.rules.b3HighDatabaseConnectionPoolUsage.severity |             | <code>warning</code>                             |
 | form.alert.groups.database.rules.b3HighDatabaseConnectionPoolUsage.val      |             | <code>80</code>                                  |
 | form.alert.groups.auth.enabled                                              |             | <code>warning</code>                             |
+<<<<<<< HEAD
 | form.alert.groups.auth.rules.b3HighAuthzDenialRate.enabled                  |             | <code>true</code>                                |
 | form.alert.groups.auth.rules.b3HighAuthzDenialRate.duration                 |             | <code>"5m"</code>                                |
 | form.alert.groups.auth.rules.b3HighAuthzDenialRate.severity                 |             | <code>warning</code>                             |
 | form.alert.groups.auth.rules.b3HighAuthzDenialRate.val                      |             | <code>10</code>                                  |
+=======
+| form.alert.groups.auth.rules                                                |             | <code></code>                                    |
+>>>>>>> 983eddd8 (Remove unused types/values and run `make gen manifests fmt`)
 | form.alert.groups.storage.enabled                                           |             | <code>warning</code>                             |
 | form.alert.groups.storage.rules.b3HighBlobStorageErrorRate.enabled          |             | <code>true</code>                                |
 | form.alert.groups.storage.rules.b3HighBlobStorageErrorRate.duration         |             | <code>"5m"</code>                                |
