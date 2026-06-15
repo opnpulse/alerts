@@ -31,26 +31,6 @@ properties:
                     type: string
                   rules:
                     properties:
-                      natsHighActiveConnections:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                       natsJetStreamDisabled:
                         properties:
                           duration:
@@ -119,33 +99,11 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      natsSuddenConnectionDrop:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                     required:
-                    - natsHighActiveConnections
                     - natsJetStreamDisabled
                     - natsSlowConsumers
                     - natsStaleConnections
                     - natsStalledClients
-                    - natsSuddenConnectionDrop
                     type: object
                 required:
                 - enabled
@@ -283,29 +241,8 @@ properties:
                         - severity
                         - val
                         type: object
-                      natsSuddenConsumerDrop:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                     required:
                     - natsHighTotalConsumers
-                    - natsSuddenConsumerDrop
                     type: object
                 required:
                 - enabled

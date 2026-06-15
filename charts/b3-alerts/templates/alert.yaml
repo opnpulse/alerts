@@ -51,18 +51,6 @@ spec:
         summary: "B3 StatefulSet has fewer ready replicas than desired"
         description: "The B3 StatefulSet {{ $app }} has fewer ready replicas than desired in namespace {{ $.Release.Namespace }}."
 {{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighGoroutineCount.enabled .rules.b3HighGoroutineCount.severity)) }}
-    - alert: B3HighGoroutineCount
-      expr: >-
-        go_goroutines{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > {{ .rules.b3HighGoroutineCount.val }}
-      for: {{ .rules.b3HighGoroutineCount.duration }}
-      labels:
-        severity: {{ .rules.b3HighGoroutineCount.severity }}
-        {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "B3 target has high goroutine count"
-        description: "A B3 scrape target has more than {{ .rules.b3HighGoroutineCount.val }} goroutines."
-{{- end }}
 {{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighGcPauseDuration.enabled .rules.b3HighGcPauseDuration.severity)) }}
     - alert: B3HighGcPauseDuration
       expr: >-
@@ -123,17 +111,6 @@ spec:
       annotations:
         summary: "B3 high HTTP latency"
         description: "B3 HTTP request p99 latency is above {{ .rules.b3HighHttpLatency.val }}s."
-{{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighActiveRequests.enabled .rules.b3HighActiveRequests.severity)) }}
-    - alert: B3HighActiveRequests
-      expr: sum(b3_http_server_active_requests{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.b3HighActiveRequests.val }}
-      for: {{ .rules.b3HighActiveRequests.duration }}
-      labels:
-        severity: {{ .rules.b3HighActiveRequests.severity }}
-        {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "B3 high number of active HTTP requests"
-        description: "B3 has more than {{ .rules.b3HighActiveRequests.val }} active HTTP requests."
 {{- end }}
 {{- end }}
 {{- end }}
@@ -209,38 +186,6 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.auth.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighAuthFailureRate.enabled .rules.b3HighAuthFailureRate.severity)) }}
-    - alert: B3HighAuthFailureRate
-      expr: |
-        (
-          sum(rate(b3_auth_failures_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-          /
-          sum(rate(b3_auth_attempts_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighAuthFailureRate.val }}
-      for: {{ .rules.b3HighAuthFailureRate.duration }}
-      labels:
-        severity: {{ .rules.b3HighAuthFailureRate.severity }}
-        {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "B3 high authentication failure rate"
-        description: "B3 authentication failure rate is above {{ .rules.b3HighAuthFailureRate.val }}%."
-{{- end }}
-{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighAuthzDenialRate.enabled .rules.b3HighAuthzDenialRate.severity)) }}
-    - alert: B3HighAuthzDenialRate
-      expr: |
-        (
-          sum(rate(b3_authz_check_denied_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-          /
-          sum(rate(b3_authz_check_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
-        ) * 100 > {{ .rules.b3HighAuthzDenialRate.val }}
-      for: {{ .rules.b3HighAuthzDenialRate.duration }}
-      labels:
-        severity: {{ .rules.b3HighAuthzDenialRate.severity }}
-        {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "B3 high authorization denial rate"
-        description: "B3 authorization denial rate is above {{ .rules.b3HighAuthzDenialRate.val }}%."
-{{- end }}
 {{- end }}
 {{- end }}
 

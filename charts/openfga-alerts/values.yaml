@@ -38,11 +38,6 @@ form:
             duration: "5m"
             val: 5
             severity: critical
-          lowCheckCacheHitRatio:
-            enabled: true
-            duration: "5m"
-            val: 70
-            severity: warning
           highSQLConnections:
             enabled: true
             duration: "5m"

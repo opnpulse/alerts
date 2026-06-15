@@ -120,25 +120,10 @@ form:
             duration: "2m"
             severity: warning
             val: 5
-          natsSuddenConnectionDrop:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 5
-          natsHighActiveConnections:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 1000
 
       consumerManagement:
         enabled: warning
         rules:
-          natsSuddenConsumerDrop:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 2
           natsHighTotalConsumers:
             enabled: false
             duration: "15m"

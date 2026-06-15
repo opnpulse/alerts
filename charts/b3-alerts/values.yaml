@@ -29,11 +29,6 @@ form:
             enabled: true
             duration: "15m"
             severity: critical
-          b3HighGoroutineCount:
-            enabled: true
-            duration: "10m"
-            severity: warning
-            val: 10000
           b3HighGcPauseDuration:
             enabled: true
             duration: "5m"
@@ -58,11 +53,6 @@ form:
             duration: "5m"
             severity: warning
             val: 1
-          b3HighActiveRequests:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 1000
 
       database:
         enabled: warning
@@ -91,17 +81,6 @@ form:
       auth:
         enabled: warning
         rules:
-          b3HighAuthFailureRate:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 10
-          b3HighAuthzDenialRate:
-            enabled: true
-            duration: "5m"
-            severity: warning
-            val: 10
-
       storage:
         enabled: warning
         rules:

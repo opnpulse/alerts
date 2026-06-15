@@ -111,33 +111,11 @@ properties:
                         - severity
                         - val
                         type: object
-                      lowCheckCacheHitRatio:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                     required:
                     - down
                     - highErrorRate
                     - highRequestLatency
                     - highSQLConnections
-                    - lowCheckCacheHitRatio
                     type: object
                 required:
                 - enabled

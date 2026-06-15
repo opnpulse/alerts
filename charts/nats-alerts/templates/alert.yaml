@@ -281,45 +281,12 @@ spec:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stale connections"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stale connections in the last 10 minutes."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSuddenConnectionDrop.enabled .rules.natsSuddenConnectionDrop.severity)) }}
-    - alert: NatsSuddenConnectionDrop
-      expr: (nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} offset 5m - nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.natsSuddenConnectionDrop.val }}
-      for: {{ .rules.natsSuddenConnectionDrop.duration }}
-      labels:
-        severity: {{ .rules.natsSuddenConnectionDrop.severity }}
-        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "Sudden drop in NATS connections (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "Active connections on NATS server {{`{{`}} $labels.server_id {{`}}`}} dropped by more than {{ .rules.natsSuddenConnectionDrop.val }} over the last 5 minutes."
-{{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighActiveConnections.enabled .rules.natsHighActiveConnections.severity)) }}
-    - alert: NatsHighActiveConnections
-      expr: nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > {{ .rules.natsHighActiveConnections.val }}
-      for: {{ .rules.natsHighActiveConnections.duration }}
-      labels:
-        severity: {{ .rules.natsHighActiveConnections.severity }}
-        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "High active connections"
-        description: "Active connections are above {{ .rules.natsHighActiveConnections.val }}."
-{{- end }}
 {{- end }}
 {{- end }}
 {{- with .Values.form.alert.groups.consumerManagement }}
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.consumerManagement.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSuddenConsumerDrop.enabled .rules.natsSuddenConsumerDrop.severity)) }}
-    - alert: NatsSuddenConsumerDrop
-      expr: (nats_server_total_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} offset 5m - nats_server_total_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.natsSuddenConsumerDrop.val }}
-      for: {{ .rules.natsSuddenConsumerDrop.duration }}
-      labels:
-        severity: {{ .rules.natsSuddenConsumerDrop.severity }}
-        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "Sudden drop in total NATS consumers (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "Total consumers on NATS server {{`{{`}} $labels.server_id {{`}}`}} dropped by more than {{ .rules.natsSuddenConsumerDrop.val }} over the last 5 minutes."
-{{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighTotalConsumers.enabled .rules.natsHighTotalConsumers.severity)) }}
     - alert: NatsHighTotalConsumers
       expr: nats:server_total_consumers:max_2m > {{ .rules.natsHighTotalConsumers.val }}
