@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.additionalRuleLabels                                               | # Additional labels for PrometheusRule alerts | <code>{}</code>                                  |
 | form.alert.groups.database.enabled                                            |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresInstanceDown.enabled                 |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresInstanceDown.duration                |                                               | <code>"0m"</code>                                |
+| form.alert.groups.database.rules.postgresInstanceDown.duration                |                                               | <code>"1m"</code>                                |
 | form.alert.groups.database.rules.postgresInstanceDown.severity                |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresRestarted.enabled                    |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresRestarted.duration                   |                                               | <code>"0m"</code>                                |
@@ -78,7 +78,7 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.groups.database.rules.postgresHighRollbackRate.val                 |                                               | <code>0.05</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.severity            |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresSplitBrain.enabled                   |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresSplitBrain.duration                  |                                               | <code>"0m"</code>                                |
+| form.alert.groups.database.rules.postgresSplitBrain.duration                  |                                               | <code>"2m"</code>                                |
 | form.alert.groups.database.rules.postgresSplitBrain.severity                  |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresTooManyLocksAcquired.enabled         |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresTooManyLocksAcquired.duration        |                                               | <code>"2m"</code>                                |

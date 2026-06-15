@@ -107,19 +107,19 @@ form:
             severity: critical
           natsSlowConsumers:
             enabled: true
-            duration: "2m"
-            severity: warning
-            val: 3
-          natsStalledClients:
-            enabled: true
-            duration: "2m"
-            severity: warning
-            val: 3
-          natsStaleConnections:
-            enabled: true
-            duration: "2m"
+            duration: "5m"
             severity: warning
             val: 5
+          natsStalledClients:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 5
+          natsStaleConnections:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 8
 
       consumerManagement:
         enabled: warning

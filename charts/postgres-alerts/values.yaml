@@ -35,7 +35,7 @@ form:
         rules:
           postgresInstanceDown:
             enabled: true
-            duration: "0m"
+            duration: "1m"
             severity: critical
           postgresRestarted:
             enabled: true
@@ -58,7 +58,7 @@ form:
             severity: warning
           postgresSplitBrain:
             enabled: true
-            duration: "0m"
+            duration: "2m"
             severity: critical
           postgresTooManyLocksAcquired:
             enabled: true
