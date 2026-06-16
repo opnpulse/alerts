@@ -136,6 +136,17 @@ spec:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PostgreSQL instance is using at least {{.rules.postgresTooManyConnections.val}}% of available connections on {{`{{`}} $labels.pod {{`}}`}}."
     {{- end }}
+    {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresSlowQueries.enabled .rules.postgresSlowQueries.severity)) -}}
+    - alert: PostgresqlSlowQueries
+      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active"} > {{ .rules.postgresSlowQueries.val }}
+      for: {{ .rules.postgresSlowQueries.duration }}
+      labels:
+        severity: {{ .rules.postgresSlowQueries.severity }}
+        {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Postgresql slow queries (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PostgreSQL has a transaction running longer than {{ .rules.postgresSlowQueries.val }}s on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
     
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh

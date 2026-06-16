@@ -51,6 +51,11 @@ form:
             duration: "5m"
             val: 95
             severity: critical
+          postgresSlowQueries:
+            enabled: true
+            duration: "1m"
+            val: 60
+            severity: warning
           postgresHighRollbackRate:
             enabled: true
             duration: "5m"

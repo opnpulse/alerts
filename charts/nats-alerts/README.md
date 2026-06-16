@@ -117,6 +117,10 @@ The following table lists the configurable parameters of the `nats-alerts` chart
 | form.alert.groups.connectivity.rules.natsStaleConnections.duration                      |                                               | <code>"5m"</code>                                |
 | form.alert.groups.connectivity.rules.natsStaleConnections.severity                      |                                               | <code>warning</code>                             |
 | form.alert.groups.connectivity.rules.natsStaleConnections.val                           |                                               | <code>8</code>                                   |
+| form.alert.groups.connectivity.rules.natsHighActiveConnections.enabled                  |                                               | <code>true</code>                                |
+| form.alert.groups.connectivity.rules.natsHighActiveConnections.duration                 |                                               | <code>"5m"</code>                                |
+| form.alert.groups.connectivity.rules.natsHighActiveConnections.severity                 |                                               | <code>warning</code>                             |
+| form.alert.groups.connectivity.rules.natsHighActiveConnections.val                      |                                               | <code>5000</code>                                |
 | form.alert.groups.consumerManagement.enabled                                            |                                               | <code>warning</code>                             |
 | form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.enabled               |                                               | <code>false</code>                               |
 | form.alert.groups.consumerManagement.rules.natsHighTotalConsumers.duration              |                                               | <code>"15m"</code>                               |

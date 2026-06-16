@@ -186,6 +186,22 @@ spec:
 {{- if (include "b3-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: b3.auth.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
+{{- if (include "b3-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.b3HighAuthzDenialRate.enabled .rules.b3HighAuthzDenialRate.severity)) }}
+    - alert: B3HighAuthzDenialRate
+      expr: |
+        (
+          sum(rate(b3_authz_check_denied_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
+          /
+          sum(rate(b3_authz_check_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m]))
+        ) * 100 > {{ .rules.b3HighAuthzDenialRate.val }}
+      for: {{ .rules.b3HighAuthzDenialRate.duration }}
+      labels:
+        severity: {{ .rules.b3HighAuthzDenialRate.severity }}
+        {{- include "b3-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: "B3 high authorization denial rate"
+        description: "B3 authorization denial rate is above {{ .rules.b3HighAuthzDenialRate.val }}%."
+{{- end }}
 {{- end }}
 {{- end }}
 

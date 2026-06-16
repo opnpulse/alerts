@@ -5118,6 +5118,7 @@ func (in *PostgresDatabaseAlertRules) DeepCopyInto(out *PostgresDatabaseAlertRul
 	out.PostgresReplicationSlotLagHigh = in.PostgresReplicationSlotLagHigh
 	out.PostgresReplicationSlotLagCritical = in.PostgresReplicationSlotLagCritical
 	out.PostgresRestarted = in.PostgresRestarted
+	out.PostgresSlowQueries = in.PostgresSlowQueries
 	out.PostgresExporterError = in.PostgresExporterError
 	out.PostgresTooManyConnections = in.PostgresTooManyConnections
 	out.PostgresHighRollbackRate = in.PostgresHighRollbackRate

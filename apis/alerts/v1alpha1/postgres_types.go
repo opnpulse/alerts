@@ -80,6 +80,7 @@ type PostgresDatabaseAlertRules struct {
 	PostgresReplicationSlotLagHigh     IntValAlert         `json:"PostgresReplicationSlotLagHigh"`
 	PostgresReplicationSlotLagCritical IntValAlert         `json:"PostgresReplicationSlotLagCritical"`
 	PostgresRestarted                  IntValAlert         `json:"postgresRestarted"`
+	PostgresSlowQueries                IntValAlert         `json:"postgresSlowQueries"`
 	PostgresExporterError              FixedAlert          `json:"postgresExporterError"`
 	PostgresTooManyConnections         IntValAlert         `json:"postgresTooManyConnections"`
 	PostgresHighRollbackRate           FloatValAlertConfig `json:"postgresHighRollbackRate"`

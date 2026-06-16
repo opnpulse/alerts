@@ -73,6 +73,10 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.groups.database.rules.postgresTooManyConnections.duration          |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.postgresTooManyConnections.val               |                                               | <code>95</code>                                  |
 | form.alert.groups.database.rules.postgresTooManyConnections.severity          |                                               | <code>critical</code>                            |
+| form.alert.groups.database.rules.postgresSlowQueries.enabled                  |                                               | <code>true</code>                                |
+| form.alert.groups.database.rules.postgresSlowQueries.duration                 |                                               | <code>"1m"</code>                                |
+| form.alert.groups.database.rules.postgresSlowQueries.val                      |                                               | <code>60</code>                                  |
+| form.alert.groups.database.rules.postgresSlowQueries.severity                 |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresHighRollbackRate.enabled             |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.duration            |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.val                 |                                               | <code>0.05</code>                                |

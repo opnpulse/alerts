@@ -186,6 +186,26 @@ properties:
                         - severity
                         - val
                         type: object
+                      postgresSlowQueries:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
                       postgresSplitBrain:
                         properties:
                           duration:
@@ -253,6 +273,7 @@ properties:
                     - postgresHighRollbackRate
                     - postgresInstanceDown
                     - postgresRestarted
+                    - postgresSlowQueries
                     - postgresSplitBrain
                     - postgresTooManyConnections
                     - postgresTooManyLocksAcquired

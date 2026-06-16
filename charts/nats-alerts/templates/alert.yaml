@@ -281,6 +281,17 @@ spec:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stale connections"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stale connections in the last 10 minutes."
 {{- end }}
+{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighActiveConnections.enabled .rules.natsHighActiveConnections.severity)) }}
+    - alert: NatsHighActiveConnections
+      expr: nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > {{ .rules.natsHighActiveConnections.val }}
+      for: {{ .rules.natsHighActiveConnections.duration }}
+      labels:
+        severity: {{ .rules.natsHighActiveConnections.severity }}
+        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: "High active connections"
+        description: "Active connections are above {{ .rules.natsHighActiveConnections.val }}."
+{{- end }}
 {{- end }}
 {{- end }}
 {{- with .Values.form.alert.groups.consumerManagement }}

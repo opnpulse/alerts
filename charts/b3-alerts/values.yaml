@@ -81,6 +81,11 @@ form:
       auth:
         enabled: warning
         rules:
+          b3HighAuthzDenialRate:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 10
       storage:
         enabled: warning
         rules:
