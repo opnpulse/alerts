@@ -96,8 +96,8 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-.+$"}
         )
-        > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
         severity: {{ $diskUsageHigh.severity }}
         {{- include "redis-alerts.alertLabels" $ | nindent 8 }}
@@ -119,8 +119,8 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-.+$"}
         )
-        > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
         severity: {{ $diskAlmostFull.severity }}
         {{- include "redis-alerts.alertLabels" $ | nindent 8 }}

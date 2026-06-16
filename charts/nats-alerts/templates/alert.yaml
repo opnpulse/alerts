@@ -295,16 +295,17 @@ spec:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stale connections"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stale connections in the last 10 minutes."
 {{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighActiveConnections.enabled .rules.natsHighActiveConnections.severity)) }}
+    {{ $natsHighActiveConnections := index (default dict .rules) "natsHighActiveConnections" }}
+    {{ if (and $natsHighActiveConnections (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $natsHighActiveConnections.enabled $natsHighActiveConnections.severity))) -}}
     - alert: NatsHighActiveConnections
-      expr: nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > {{ .rules.natsHighActiveConnections.val }}
-      for: {{ .rules.natsHighActiveConnections.duration }}
+      expr: nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > {{ $natsHighActiveConnections.val }}
+      for: {{ $natsHighActiveConnections.duration }}
       labels:
-        severity: {{ .rules.natsHighActiveConnections.severity }}
+        severity: {{ $natsHighActiveConnections.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: "High active connections"
-        description: "Active connections are above {{ .rules.natsHighActiveConnections.val }}."
+        description: "Active connections are above {{ $natsHighActiveConnections.val }}."
 {{- end }}
 {{- end }}
 {{- end }}

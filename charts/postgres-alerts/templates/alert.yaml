@@ -60,8 +60,8 @@ spec:
     {{ $PostgresReplicationSlotLagHigh := index (default dict .rules) "PostgresReplicationSlotLagHigh" }}
     {{ if (and $PostgresReplicationSlotLagHigh (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $PostgresReplicationSlotLagHigh.enabled $PostgresReplicationSlotLagHigh.severity))) -}}
     - alert: PostgresReplicationSlotLagHigh
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
-      for: {{ .rules.PostgresReplicationSlotLagHigh.duration }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ $PostgresReplicationSlotLagHigh.duration }}]) > {{ $PostgresReplicationSlotLagHigh.val }}
+      for: {{ $PostgresReplicationSlotLagHigh.duration }}
       labels:
         severity: {{ $PostgresReplicationSlotLagHigh.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
@@ -72,8 +72,8 @@ spec:
     {{ $PostgresReplicationSlotLagCritical := index (default dict .rules) "PostgresReplicationSlotLagCritical" }}
     {{ if (and $PostgresReplicationSlotLagCritical (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $PostgresReplicationSlotLagCritical.enabled $PostgresReplicationSlotLagCritical.severity))) -}}
     - alert: PostgresReplicationSlotLagCritical
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
-      for: {{ .rules.PostgresReplicationSlotLagCritical.duration }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ $PostgresReplicationSlotLagCritical.duration }}]) > {{ $PostgresReplicationSlotLagCritical.val }}
+      for: {{ $PostgresReplicationSlotLagCritical.duration }}
       labels:
         severity: {{ $PostgresReplicationSlotLagCritical.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
@@ -145,16 +145,17 @@ spec:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PostgreSQL instance is using at least {{$postgresTooManyConnections.val}}% of available connections on {{`{{`}} $labels.pod {{`}}`}}."
     {{- end }}
-    {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresSlowQueries.enabled .rules.postgresSlowQueries.severity)) -}}
+    {{ $postgresSlowQueries := index (default dict .rules) "postgresSlowQueries" }}
+    {{ if (and $postgresSlowQueries (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled $postgresSlowQueries.enabled $postgresSlowQueries.severity))) -}}
     - alert: PostgresqlSlowQueries
-      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active"} > {{ .rules.postgresSlowQueries.val }}
-      for: {{ .rules.postgresSlowQueries.duration }}
+      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active"} > {{ $postgresSlowQueries.val }}
+      for: {{ $postgresSlowQueries.duration }}
       labels:
-        severity: {{ .rules.postgresSlowQueries.severity }}
+        severity: {{ $postgresSlowQueries.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Postgresql slow queries (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "PostgreSQL has a transaction running longer than {{ .rules.postgresSlowQueries.val }}s on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgreSQL has a transaction running longer than {{ $postgresSlowQueries.val }}s on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
     {{ $diskUsageHigh := index (default dict .rules) "diskUsageHigh" }}
@@ -171,8 +172,8 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
         )
-        > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
+        > {{ $diskUsageHigh.val }}
+      for: {{ $diskUsageHigh.duration }}
       labels:
         severity: {{ $diskUsageHigh.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
@@ -194,8 +195,8 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
         )
-        > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
+        > {{ $diskAlmostFull.val }}
+      for: {{ $diskAlmostFull.duration }}
       labels:
         severity: {{ $diskAlmostFull.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
