@@ -56,7 +56,7 @@ spec:
     {{end -}}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.PostgresReplicationSlotLagHigh.enabled .rules.PostgresReplicationSlotLagHigh.severity)) -}}
     - alert: PostgresReplicationSlotLagHigh
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
       for: {{ .rules.PostgresReplicationSlotLagHigh.duration }}
       labels:
         severity: {{ .rules.PostgresReplicationSlotLagHigh.severity }}
@@ -67,7 +67,7 @@ spec:
     {{end -}}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.PostgresReplicationSlotLagCritical.enabled .rules.PostgresReplicationSlotLagCritical.severity)) -}}
     - alert: PostgresReplicationSlotLagCritical
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
       for: {{ .rules.PostgresReplicationSlotLagCritical.duration }}
       labels:
         severity: {{ .rules.PostgresReplicationSlotLagCritical.severity }}
@@ -147,7 +147,7 @@ spec:
         summary: Postgresql slow queries (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PostgreSQL has a transaction running longer than {{ .rules.postgresSlowQueries.val }}s on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    
+
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh
       expr: >-
