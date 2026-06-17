@@ -13,6 +13,11 @@ metadata:
 
 form:
   alert:
+    ## Suffix appended to .Release.Name to form the application name ($app).
+    ## Leave empty for standalone deployments. Set when deployed as a subchart
+    ## to match the KubeDB resource suffix (e.g. "-db" for Postgres).
+    appSuffix: ""
+
     ## Enable PrometheusRule alerts
     enabled: warning
 

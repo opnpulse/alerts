@@ -58,7 +58,9 @@ type RedisAlert struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
-	Groups               RedisAlertGroups  `json:"groups"`
+	// +optional
+	AppSuffix string           `json:"appSuffix"`
+	Groups    RedisAlertGroups `json:"groups"`
 }
 
 type RedisAlertGroups struct {

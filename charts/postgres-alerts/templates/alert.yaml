@@ -159,7 +159,7 @@ spec:
         )
         * on(namespace, persistentvolumeclaim) group_left(pod)
         max by (namespace, persistentvolumeclaim, pod) (
-          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
         )
         > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
@@ -181,7 +181,7 @@ spec:
         )
         * on(namespace, persistentvolumeclaim) group_left(pod)
         max by (namespace, persistentvolumeclaim, pod) (
-          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $.Release.Name }}-[0-9]+$"}
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
         )
         > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
