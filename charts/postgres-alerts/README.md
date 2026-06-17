@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.additionalRuleLabels                                               | # Additional labels for PrometheusRule alerts | <code>{}</code>                                  |
 | form.alert.groups.database.enabled                                            |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresInstanceDown.enabled                 |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresInstanceDown.duration                |                                               | <code>"0m"</code>                                |
+| form.alert.groups.database.rules.postgresInstanceDown.duration                |                                               | <code>"1m"</code>                                |
 | form.alert.groups.database.rules.postgresInstanceDown.severity                |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresRestarted.enabled                    |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresRestarted.duration                   |                                               | <code>"0m"</code>                                |
@@ -70,26 +70,19 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.groups.database.rules.postgresExporterError.duration               |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.postgresExporterError.severity               |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresTooManyConnections.enabled           |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresTooManyConnections.duration          |                                               | <code>"2m"</code>                                |
-| form.alert.groups.database.rules.postgresTooManyConnections.val               |                                               | <code>80</code>                                  |
-| form.alert.groups.database.rules.postgresTooManyConnections.severity          |                                               | <code>warning</code>                             |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.enabled         |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.duration        |                                               | <code>"2m"</code>                                |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.val             |                                               | <code>5</code>                                   |
-| form.alert.groups.database.rules.postgresNotEnoughConnections.severity        |                                               | <code>warning</code>                             |
+| form.alert.groups.database.rules.postgresTooManyConnections.duration          |                                               | <code>"5m"</code>                                |
+| form.alert.groups.database.rules.postgresTooManyConnections.val               |                                               | <code>95</code>                                  |
+| form.alert.groups.database.rules.postgresTooManyConnections.severity          |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresSlowQueries.enabled                  |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresSlowQueries.duration                 |                                               | <code>"2m"</code>                                |
+| form.alert.groups.database.rules.postgresSlowQueries.duration                 |                                               | <code>"1m"</code>                                |
+| form.alert.groups.database.rules.postgresSlowQueries.val                      |                                               | <code>60</code>                                  |
 | form.alert.groups.database.rules.postgresSlowQueries.severity                 |                                               | <code>warning</code>                             |
-| form.alert.groups.database.rules.postgresReplicationLag.enabled               |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresReplicationLag.duration              |                                               | <code>"0m"</code>                                |
-| form.alert.groups.database.rules.postgresReplicationLag.val                   |                                               | <code>30s</code>                                 |
-| form.alert.groups.database.rules.postgresReplicationLag.severity              |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresHighRollbackRate.enabled             |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresHighRollbackRate.duration            |                                               | <code>"0m"</code>                                |
-| form.alert.groups.database.rules.postgresHighRollbackRate.val                 |                                               | <code>0.02</code>                                |
+| form.alert.groups.database.rules.postgresHighRollbackRate.duration            |                                               | <code>"5m"</code>                                |
+| form.alert.groups.database.rules.postgresHighRollbackRate.val                 |                                               | <code>0.05</code>                                |
 | form.alert.groups.database.rules.postgresHighRollbackRate.severity            |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.postgresSplitBrain.enabled                   |                                               | <code>true</code>                                |
-| form.alert.groups.database.rules.postgresSplitBrain.duration                  |                                               | <code>"0m"</code>                                |
+| form.alert.groups.database.rules.postgresSplitBrain.duration                  |                                               | <code>"2m"</code>                                |
 | form.alert.groups.database.rules.postgresSplitBrain.severity                  |                                               | <code>critical</code>                            |
 | form.alert.groups.database.rules.postgresTooManyLocksAcquired.enabled         |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.postgresTooManyLocksAcquired.duration        |                                               | <code>"2m"</code>                                |
@@ -105,11 +98,11 @@ The following table lists the configurable parameters of the `postgres-alerts` c
 | form.alert.groups.database.rules.PostgresReplicationSlotLagCritical.val       |                                               | <code>1288490188 # 1.2 GB</code>                 |
 | form.alert.groups.database.rules.diskUsageHigh.enabled                        |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.diskUsageHigh.val                            |                                               | <code>80</code>                                  |
-| form.alert.groups.database.rules.diskUsageHigh.duration                       |                                               | <code>"1m"</code>                                |
+| form.alert.groups.database.rules.diskUsageHigh.duration                       |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.diskUsageHigh.severity                       |                                               | <code>warning</code>                             |
 | form.alert.groups.database.rules.diskAlmostFull.enabled                       |                                               | <code>true</code>                                |
 | form.alert.groups.database.rules.diskAlmostFull.val                           |                                               | <code>95</code>                                  |
-| form.alert.groups.database.rules.diskAlmostFull.duration                      |                                               | <code>"1m"</code>                                |
+| form.alert.groups.database.rules.diskAlmostFull.duration                      |                                               | <code>"5m"</code>                                |
 | form.alert.groups.database.rules.diskAlmostFull.severity                      |                                               | <code>critical</code>                            |
 | form.alert.groups.provisioner.enabled                                         |                                               | <code>warning</code>                             |
 | form.alert.groups.provisioner.rules.appPhaseNotReady.enabled                  |                                               | <code>true</code>                                |

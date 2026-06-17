@@ -20,66 +20,6 @@ properties:
             type: string
           groups:
             properties:
-              auth:
-                description: Authentication/Authorization alerts
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      b3HighAuthFailureRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      b3HighAuthzDenialRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - b3HighAuthFailureRate
-                    - b3HighAuthzDenialRate
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
               database:
                 description: Database alerts
                 properties:
@@ -195,26 +135,6 @@ properties:
                     type: string
                   rules:
                     properties:
-                      b3HighActiveRequests:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                       b3HighHttpErrorRate:
                         properties:
                           duration:
@@ -257,7 +177,6 @@ properties:
                         - val
                         type: object
                     required:
-                    - b3HighActiveRequests
                     - b3HighHttpErrorRate
                     - b3HighHttpLatency
                     type: object
@@ -335,26 +254,6 @@ properties:
                         - severity
                         - val
                         type: object
-                      b3HighGoroutineCount:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                       b3ReplicasNotReady:
                         properties:
                           duration:
@@ -376,7 +275,6 @@ properties:
                     - b3Down
                     - b3HighFileDescriptorUsage
                     - b3HighGcPauseDuration
-                    - b3HighGoroutineCount
                     - b3ReplicasNotReady
                     type: object
                 required:
@@ -484,7 +382,6 @@ properties:
                 - rules
                 type: object
             required:
-            - auth
             - database
             - http
             - process

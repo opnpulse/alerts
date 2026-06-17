@@ -241,7 +241,10 @@ spec:
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSlowConsumers.enabled .rules.natsSlowConsumers.severity)) }}
     - alert: NatsSlowConsumers
-      expr: increase(nats_varz_slow_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m]) > 0
+      expr: >-
+        sum by (namespace, job, pod, server_id, server_name) (
+          increase(nats_varz_slow_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
+        ) >= {{ .rules.natsSlowConsumers.val }}
       for: {{ .rules.natsSlowConsumers.duration }}
       labels:
         severity: {{ .rules.natsSlowConsumers.severity }}
@@ -252,7 +255,10 @@ spec:
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsStalledClients.enabled .rules.natsStalledClients.severity)) }}
     - alert: NatsStalledClients
-      expr: increase(nats_varz_stalled_clients{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m]) > 0
+      expr: >-
+        sum by (namespace, job, pod, server_id, server_name) (
+          increase(nats_varz_stalled_clients{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
+        ) >= {{ .rules.natsStalledClients.val }}
       for: {{ .rules.natsStalledClients.duration }}
       labels:
         severity: {{ .rules.natsStalledClients.severity }}
@@ -263,7 +269,10 @@ spec:
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsStaleConnections.enabled .rules.natsStaleConnections.severity)) }}
     - alert: NatsStaleConnections
-      expr: increase(nats_varz_stale_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m]) > 0
+      expr: >-
+        sum by (namespace, job, pod, server_id, server_name) (
+          increase(nats_varz_stale_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
+        ) >= {{ .rules.natsStaleConnections.val }}
       for: {{ .rules.natsStaleConnections.duration }}
       labels:
         severity: {{ .rules.natsStaleConnections.severity }}
@@ -271,17 +280,6 @@ spec:
       annotations:
         summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stale connections"
         description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stale connections in the last 10 minutes."
-{{- end }}
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSuddenConnectionDrop.enabled .rules.natsSuddenConnectionDrop.severity)) }}
-    - alert: NatsSuddenConnectionDrop
-      expr: (nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} offset 5m - nats_varz_connections{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.natsSuddenConnectionDrop.val }}
-      for: {{ .rules.natsSuddenConnectionDrop.duration }}
-      labels:
-        severity: {{ .rules.natsSuddenConnectionDrop.severity }}
-        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "Sudden drop in NATS connections (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "Active connections on NATS server {{`{{`}} $labels.server_id {{`}}`}} dropped by more than {{ .rules.natsSuddenConnectionDrop.val }} over the last 5 minutes."
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighActiveConnections.enabled .rules.natsHighActiveConnections.severity)) }}
     - alert: NatsHighActiveConnections
@@ -300,17 +298,6 @@ spec:
 {{- if (include "nats-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
   - name: nats.consumerManagement.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-{{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsSuddenConsumerDrop.enabled .rules.natsSuddenConsumerDrop.severity)) }}
-    - alert: NatsSuddenConsumerDrop
-      expr: (nats_server_total_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} offset 5m - nats_server_total_consumers{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.natsSuddenConsumerDrop.val }}
-      for: {{ .rules.natsSuddenConsumerDrop.duration }}
-      labels:
-        severity: {{ .rules.natsSuddenConsumerDrop.severity }}
-        {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: "Sudden drop in total NATS consumers (instance {{`{{`}} $labels.server_id {{`}}`}})"
-        description: "Total consumers on NATS server {{`{{`}} $labels.server_id {{`}}`}} dropped by more than {{ .rules.natsSuddenConsumerDrop.val }} over the last 5 minutes."
-{{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsHighTotalConsumers.enabled .rules.natsHighTotalConsumers.severity)) }}
     - alert: NatsHighTotalConsumers
       expr: nats:server_total_consumers:max_2m > {{ .rules.natsHighTotalConsumers.val }}

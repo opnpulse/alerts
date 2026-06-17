@@ -55,20 +55,6 @@ spec:
         summary: High error rate in OpenFGA requests
         description: "OpenFGA gRPC error rate is above {{ .rules.highErrorRate.val }}%."
     {{- end }}
-    {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.lowCheckCacheHitRatio.enabled .rules.lowCheckCacheHitRatio.severity)) -}}
-    - alert: OpenFGALowCheckCacheHitRatio
-      expr: |
-        sum(rate(openfga_check_cache_total_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[1m])) > 0
-        and
-        (sum(rate(openfga_check_cache_hit_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[1m])) / sum(rate(openfga_check_cache_total_count{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[1m]))) * 100 < {{ .rules.lowCheckCacheHitRatio.val }}
-      for: {{ .rules.lowCheckCacheHitRatio.duration }}
-      labels:
-        severity: {{ .rules.lowCheckCacheHitRatio.severity }}
-        {{- include "openfga-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: Low cache hit ratio for OpenFGA Check API
-        description: "OpenFGA Check API cache hit ratio is below {{ .rules.lowCheckCacheHitRatio.val }}%."
-    {{- end }}
     {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSQLConnections.enabled .rules.highSQLConnections.severity)) -}}
     - alert: OpenFGAHighSQLConnections
       expr: |

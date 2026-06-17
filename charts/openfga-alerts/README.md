@@ -45,44 +45,40 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `openfga-alerts` chart and their default values.
 
-|                          Parameter                          | Description | Default                            |
-|-------------------------------------------------------------|-------------|------------------------------------|
-| metadata.resource.group                                     |             | <code>apps</code>                  |
-| metadata.resource.kind                                      |             | <code>Deployment</code>            |
-| metadata.resource.name                                      |             | <code>deployments</code>           |
-| metadata.resource.scope                                     |             | <code>Namespaced</code>            |
-| metadata.resource.version                                   |             | <code>v1</code>                    |
-| metadata.release.name                                       |             | <code>""</code>                    |
-| metadata.release.namespace                                  |             | <code>""</code>                    |
-| form.alert.enabled                                          |             | <code>warning</code>               |
-| form.alert.labels.release                                   |             | <code>kube-prometheus-stack</code> |
-| form.alert.annotations                                      |             | <code>{}</code>                    |
-| form.alert.additionalRuleLabels                             |             | <code>{}</code>                    |
-| form.alert.groups.core.enabled                              |             | <code>warning</code>               |
-| form.alert.groups.core.rules.down.enabled                   |             | <code>true</code>                  |
-| form.alert.groups.core.rules.down.duration                  |             | <code>"5m"</code>                  |
-| form.alert.groups.core.rules.down.severity                  |             | <code>critical</code>              |
-| form.alert.groups.core.rules.highRequestLatency.enabled     |             | <code>true</code>                  |
-| form.alert.groups.core.rules.highRequestLatency.duration    |             | <code>"5m"</code>                  |
-| form.alert.groups.core.rules.highRequestLatency.val         |             | <code>1.0</code>                   |
-| form.alert.groups.core.rules.highRequestLatency.severity    |             | <code>critical</code>              |
-| form.alert.groups.core.rules.highErrorRate.enabled          |             | <code>true</code>                  |
-| form.alert.groups.core.rules.highErrorRate.duration         |             | <code>"5m"</code>                  |
-| form.alert.groups.core.rules.highErrorRate.val              |             | <code>5</code>                     |
-| form.alert.groups.core.rules.highErrorRate.severity         |             | <code>critical</code>              |
-| form.alert.groups.core.rules.lowCheckCacheHitRatio.enabled  |             | <code>true</code>                  |
-| form.alert.groups.core.rules.lowCheckCacheHitRatio.duration |             | <code>"5m"</code>                  |
-| form.alert.groups.core.rules.lowCheckCacheHitRatio.val      |             | <code>70</code>                    |
-| form.alert.groups.core.rules.lowCheckCacheHitRatio.severity |             | <code>warning</code>               |
-| form.alert.groups.core.rules.highSQLConnections.enabled     |             | <code>true</code>                  |
-| form.alert.groups.core.rules.highSQLConnections.duration    |             | <code>"5m"</code>                  |
-| form.alert.groups.core.rules.highSQLConnections.val         |             | <code>80</code>                    |
-| form.alert.groups.core.rules.highSQLConnections.severity    |             | <code>critical</code>              |
-| grafana.enabled                                             |             | <code>false</code>                 |
-| grafana.version                                             |             | <code>8.2.3</code>                 |
-| grafana.jobName                                             |             | <code>openfga</code>               |
-| grafana.url                                                 |             | <code>""</code>                    |
-| grafana.apikey                                              |             | <code>""</code>                    |
+|                        Parameter                         | Description |              Default               |
+|----------------------------------------------------------|-------------|------------------------------------|
+| metadata.resource.group                                  |             | <code>apps</code>                  |
+| metadata.resource.kind                                   |             | <code>Deployment</code>            |
+| metadata.resource.name                                   |             | <code>deployments</code>           |
+| metadata.resource.scope                                  |             | <code>Namespaced</code>            |
+| metadata.resource.version                                |             | <code>v1</code>                    |
+| metadata.release.name                                    |             | <code>""</code>                    |
+| metadata.release.namespace                               |             | <code>""</code>                    |
+| form.alert.enabled                                       |             | <code>warning</code>               |
+| form.alert.labels.release                                |             | <code>kube-prometheus-stack</code> |
+| form.alert.annotations                                   |             | <code>{}</code>                    |
+| form.alert.additionalRuleLabels                          |             | <code>{}</code>                    |
+| form.alert.groups.core.enabled                           |             | <code>warning</code>               |
+| form.alert.groups.core.rules.down.enabled                |             | <code>true</code>                  |
+| form.alert.groups.core.rules.down.duration               |             | <code>"15m"</code>                 |
+| form.alert.groups.core.rules.down.severity               |             | <code>critical</code>              |
+| form.alert.groups.core.rules.highRequestLatency.enabled  |             | <code>true</code>                  |
+| form.alert.groups.core.rules.highRequestLatency.duration |             | <code>"5m"</code>                  |
+| form.alert.groups.core.rules.highRequestLatency.val      |             | <code>1.0</code>                   |
+| form.alert.groups.core.rules.highRequestLatency.severity |             | <code>critical</code>              |
+| form.alert.groups.core.rules.highErrorRate.enabled       |             | <code>true</code>                  |
+| form.alert.groups.core.rules.highErrorRate.duration      |             | <code>"5m"</code>                  |
+| form.alert.groups.core.rules.highErrorRate.val           |             | <code>5</code>                     |
+| form.alert.groups.core.rules.highErrorRate.severity      |             | <code>critical</code>              |
+| form.alert.groups.core.rules.highSQLConnections.enabled  |             | <code>true</code>                  |
+| form.alert.groups.core.rules.highSQLConnections.duration |             | <code>"5m"</code>                  |
+| form.alert.groups.core.rules.highSQLConnections.val      |             | <code>80</code>                    |
+| form.alert.groups.core.rules.highSQLConnections.severity |             | <code>critical</code>              |
+| grafana.enabled                                          |             | <code>false</code>                 |
+| grafana.version                                          |             | <code>8.2.3</code>                 |
+| grafana.jobName                                          |             | <code>openfga</code>               |
+| grafana.url                                              |             | <code>""</code>                    |
+| grafana.apikey                                           |             | <code>""</code>                    |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
