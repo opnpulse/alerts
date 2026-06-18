@@ -37,11 +37,12 @@ spec:
       expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
       for: {{ .rules.redisMissingMaster.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.redisMissingMaster.severity }}
         {{- include "redis-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Redis missing master (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis cluster has less than expected amount of node marked as master\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis missing master (component {{`{{`}} $labels.job {{`}}`}})
+        description: "Redis cluster has less than expected amount of nodes marked as master for {{`{{`}} $labels.job {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "redis-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisTooManyConnections.enabled .rules.redisTooManyConnections.severity)) -}}
     - alert: RedisTooManyConnections
@@ -59,11 +60,12 @@ spec:
       expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.redisTooManyMasters.val}}
       for: {{ .rules.redisTooManyMasters.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.redisTooManyMasters.severity }}
         {{- include "redis-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Redis too many master nodes (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis cluster has too many nodes marked as master. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis too many master nodes (component {{`{{`}} $labels.job {{`}}`}})
+        description: "Redis cluster has too many nodes marked as master for {{`{{`}} $labels.job {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if (include "redis-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisDisconnectedSlaves.enabled .rules.redisDisconnectedSlaves.severity)) -}}
     - alert: RedisDisconnectedSlaves

@@ -26,6 +26,7 @@ spec:
       expr: count(kafka_connect_worker_connector_count{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.connectClusterWorkerDown.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.connectClusterWorkerDown.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
