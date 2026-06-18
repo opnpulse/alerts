@@ -57,8 +57,10 @@ type PostgresAlert struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	AdditionalRuleLabels map[string]string   `json:"additionalRuleLabels"`
-	Groups               PostgresAlertGroups `json:"groups"`
+	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
+	// +optional
+	AppSuffix string              `json:"appSuffix"`
+	Groups    PostgresAlertGroups `json:"groups"`
 }
 
 type PostgresAlertGroups struct {
