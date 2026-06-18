@@ -31,6 +31,26 @@ properties:
                     type: string
                   rules:
                     properties:
+                      natsHighActiveConnections:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
                       natsJetStreamDisabled:
                         properties:
                           duration:
@@ -100,6 +120,7 @@ properties:
                         - severity
                         type: object
                     required:
+                    - natsHighActiveConnections
                     - natsJetStreamDisabled
                     - natsSlowConsumers
                     - natsStaleConnections
