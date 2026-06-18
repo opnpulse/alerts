@@ -103,6 +103,7 @@ spec:
       expr: count(kafka_server_kafkaserver_brokerstate{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == {{ .rules.kafkaBrokerCount.val }}
       for: {{ .rules.kafkaBrokerCount.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.kafkaBrokerCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -147,6 +148,7 @@ spec:
       expr: count(count(kafka_server_brokertopicmetrics_messagesin_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) by (topic,service)) by (service) > {{ .rules.kafkaTopicCount.val }}
       for: {{ .rules.kafkaTopicCount.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.kafkaTopicCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:

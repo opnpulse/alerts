@@ -26,6 +26,7 @@ spec:
       expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="down"})) OR on() vector(0) != 0
       for: {{ .rules.solrDownShards.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.solrDownShards.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -37,6 +38,7 @@ spec:
       expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="recovery_failed"})) OR on() vector(0) != 0
       for: {{ .rules.solrRecoveryFailedShards.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.solrRecoveryFailedShards.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
@@ -155,5 +157,4 @@ spec:
   {{ end -}}
 
 {{ end }}
-
 

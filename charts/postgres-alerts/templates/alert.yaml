@@ -37,6 +37,7 @@ spec:
       expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0) != 1
       for: {{ .rules.postgresSplitBrain.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.postgresSplitBrain.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:

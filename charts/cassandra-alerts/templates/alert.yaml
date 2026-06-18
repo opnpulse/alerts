@@ -26,6 +26,7 @@ spec:
       expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.val}}
       for: {{ .rules.cassandraDown.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.cassandraDown.severity }}
         {{- include "cassandra-alerts.alertLabels" $ | nindent 8 }}
       annotations:
