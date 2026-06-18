@@ -66,6 +66,7 @@ type B3AlertGroups struct {
 	HTTP     B3HTTPAlert     `json:"http"`
 	Database B3DatabaseAlert `json:"database"`
 	Storage  B3StorageAlert  `json:"storage"`
+	Auth     B3AuthAlert     `json:"auth"`
 	Proxy    B3ProxyAlert    `json:"proxy"`
 }
 
@@ -114,6 +115,16 @@ type B3StorageAlert struct {
 
 type B3StorageAlertRules struct {
 	B3HighBlobStorageErrorRate IntValAlert `json:"b3HighBlobStorageErrorRate"`
+}
+
+// AuthZ alerts
+type B3AuthAlert struct {
+	Enabled mona.SeverityFlag `json:"enabled"`
+	Rules   B3AuthAlertRules  `json:"rules"`
+}
+
+type B3AuthAlertRules struct {
+	B3HighAuthzDenialRate IntValAlert `json:"b3HighAuthzDenialRate"`
 }
 
 // Proxy/K8s Operations alerts

@@ -20,6 +20,45 @@ properties:
             type: string
           groups:
             properties:
+              auth:
+                description: AuthZ alerts
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      b3HighAuthzDenialRate:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                    required:
+                    - b3HighAuthzDenialRate
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
               database:
                 description: Database alerts
                 properties:
@@ -382,6 +421,7 @@ properties:
                 - rules
                 type: object
             required:
+            - auth
             - database
             - http
             - process
