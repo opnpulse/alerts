@@ -1,0 +1,18 @@
+project:
+  name: ClickHouse alerts by AppsCode
+  shortName: ClickHouse alerts
+  url: https://github.com/appscode/alerts
+  description: ClickHouse alerts for KubeDB
+  app: ClickHouse alerts
+repository:
+  url: oci://ghcr.io/appscode-charts
+  name: appscode
+chart:
+  name: clickhouse
+  values: -- generate from values file --
+  valuesExample: -- generate from values file --
+prerequisites:
+- Kubernetes 1.19+
+release:
+  name: clickhouse
+  namespace: demo
