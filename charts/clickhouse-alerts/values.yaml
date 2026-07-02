@@ -45,23 +45,14 @@ form:
           clickhouseTooManyConnections:
             enabled: true
             duration: "5m"
-            val: 90
+            val: 400
             severity: critical
           clickhouseSlowQueries:
             enabled: true
             duration: "1m"
-            val: 60
+            val: 500
             severity: warning
           clickhouseReplicationLag:
-            enabled: true
-            duration: "1m"
-            val: 838860800 # 800 MB
-            severity: warning
-          clickhouseMergeErrors:
-            enabled: true
-            duration: "5m"
-            severity: warning
-          clickhouseExporterError:
             enabled: true
             duration: "5m"
             severity: warning

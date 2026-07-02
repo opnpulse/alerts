@@ -79,9 +79,7 @@ type ClickhouseDatabaseAlertRules struct {
 	ClickhouseInstanceDown       FixedAlert  `json:"clickhouseInstanceDown"`
 	ClickhouseTooManyConnections IntValAlert `json:"clickhouseTooManyConnections"`
 	ClickhouseSlowQueries        IntValAlert `json:"clickhouseSlowQueries"`
-	ClickhouseReplicationLag     IntValAlert `json:"clickhouseReplicationLag"`
-	ClickhouseMergeErrors        FixedAlert  `json:"clickhouseMergeErrors"`
-	ClickhouseExporterError      FixedAlert  `json:"clickhouseExporterError"`
+	ClickhouseReplicationLag     FixedAlert  `json:"clickhouseReplicationLag"`
 	DiskUsageHigh                IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull               IntValAlert `json:"diskAlmostFull"`
 }

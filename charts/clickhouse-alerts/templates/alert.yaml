@@ -23,7 +23,7 @@ spec:
     rules:
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseInstanceDown.enabled .rules.clickhouseInstanceDown.severity)) -}}
     - alert: ClickhouseInstanceDown
-      expr: clickhouse_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.clickhouseInstanceDown.duration }}
       labels:
         severity: {{ .rules.clickhouseInstanceDown.severity }}
@@ -34,67 +34,36 @@ spec:
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseTooManyConnections.enabled .rules.clickhouseTooManyConnections.severity)) -}}
     - alert: ClickhouseTooManyConnections
-      expr: |-
-        (
-          sum by (instance) (
-            clickhouse_tcp_connection{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}+
-            clickhouse_http_connection{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}
-          )
-          /
-          clickhouse_max_connection{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}
-          * 100
-        ) > {{ .rules.clickhouseTooManyConnections.val }}
+      expr: ClickHouseMetrics_TCPConnection{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseTooManyConnections.val }}
       for: {{ .rules.clickhouseTooManyConnections.duration }}
       labels:
         severity: {{ .rules.clickhouseTooManyConnections.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ClickHouse too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse instance is using more than {{ .rules.clickhouseTooManyConnections.val }}% of available connections on {{`{{`}} $labels.instance {{`}}`}}."
+        description: "ClickHouse instance has more than {{ .rules.clickhouseTooManyConnections.val }} TCP connections on {{`{{`}} $labels.instance {{`}}`}}."
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseSlowQueries.enabled .rules.clickhouseSlowQueries.severity)) -}}
     - alert: ClickhouseSlowQueries
-      expr: clickhouse_slow_query_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseSlowQueries.val }}
+      expr: ClickHouseMetrics_Query{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseSlowQueries.val }}
       for: {{ .rules.clickhouseSlowQueries.duration }}
       labels:
         severity: {{ .rules.clickhouseSlowQueries.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse slow queries (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse has queries running longer than {{ .rules.clickhouseSlowQueries.val }}s on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse too many active queries (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "ClickHouse has more than {{ .rules.clickhouseSlowQueries.val }} active queries on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseReplicationLag.enabled .rules.clickhouseReplicationLag.severity)) -}}
     - alert: ClickhouseReplicationLag
-      expr: clickhouse_replication_queue_size{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseReplicationLag.val }}
+      expr: increase(ClickHouseProfileEvents_ReplicatedPartFailedFetches{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
       for: {{ .rules.clickhouseReplicationLag.duration }}
       labels:
         severity: {{ .rules.clickhouseReplicationLag.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse replication queue size is above {{ .rules.clickhouseReplicationLag.val }} bytes on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{end -}}
-    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseMergeErrors.enabled .rules.clickhouseMergeErrors.severity)) -}}
-    - alert: ClickhouseMergeErrors
-      expr: rate(clickhouse_merge_tree_parts_metric_errors_total{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
-      for: {{ .rules.clickhouseMergeErrors.duration }}
-      labels:
-        severity: {{ .rules.clickhouseMergeErrors.severity }}
-        {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: ClickHouse merge errors (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse merge tree is experiencing errors on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{end -}}
-    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseExporterError.enabled .rules.clickhouseExporterError.severity)) -}}
-    - alert: ClickhouseExporterError
-      expr: clickhouse_exporter_last_scrape_error{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > 0
-      for: {{ .rules.clickhouseExporterError.duration }}
-      labels:
-        severity: {{ .rules.clickhouseExporterError.severity }}
-        {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: ClickHouse exporter error (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse exporter is showing errors. A query may be buggy in query.yaml\n  {{`{{`}} $labels.instance {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse replication failures (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "ClickHouse has replication part fetch failures on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
 
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
@@ -188,7 +157,7 @@ spec:
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ClickHouseOpsRequest on progress (clickhouseopsrequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}})
-        description: "ClickHouseOpsRequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "ClickHouseOpsRequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}} is in progressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
     - alert: KubeDBClickHouseOpsRequestStatusProgressingToLong

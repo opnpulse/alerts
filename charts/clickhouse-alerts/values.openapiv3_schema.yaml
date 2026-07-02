@@ -33,41 +33,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      clickhouseExporterError:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
                       clickhouseInstanceDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      clickhouseMergeErrors:
                         properties:
                           duration:
                             type: string
@@ -96,13 +62,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       clickhouseSlowQueries:
                         properties:
@@ -185,9 +148,7 @@ properties:
                         - val
                         type: object
                     required:
-                    - clickhouseExporterError
                     - clickhouseInstanceDown
-                    - clickhouseMergeErrors
                     - clickhouseReplicationLag
                     - clickhouseSlowQueries
                     - clickhouseTooManyConnections
