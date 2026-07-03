@@ -76,14 +76,14 @@ type ClickhouseDatabaseAlert struct {
 }
 
 type ClickhouseDatabaseAlertRules struct {
-	ClickhouseInstanceDown              FixedAlert  `json:"clickhouseInstanceDown"`
-	ClickhouseTooManyConnections        IntValAlert `json:"clickhouseTooManyConnections"`
-	ClickhouseTooManyActiveQueries         IntValAlert `json:"clickhouseTooManyActiveQueries"`
-	ClickhouseReplicationPartFetchFailed FixedAlert `json:"clickhouseReplicationPartFetchFailed"`
-	ClickhouseBrokenPartsDetected       FixedAlert  `json:"clickhouseBrokenPartsDetected"`
-	ClickhouseDataPartCorrupted         FixedAlert  `json:"clickhouseDataPartCorrupted"`
-	DiskUsageHigh                       IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull                      IntValAlert `json:"diskAlmostFull"`
+	ClickhouseInstanceDown               FixedAlert  `json:"clickhouseInstanceDown"`
+	ClickhouseTooManyConnections         IntValAlert `json:"clickhouseTooManyConnections"`
+	ClickhouseTooManyActiveQueries       IntValAlert `json:"clickhouseTooManyActiveQueries"`
+	ClickhouseReplicationPartFetchFailed FixedAlert  `json:"clickhouseReplicationPartFetchFailed"`
+	ClickhouseBrokenPartsDetected        FixedAlert  `json:"clickhouseBrokenPartsDetected"`
+	ClickhouseDataPartCorrupted          FixedAlert  `json:"clickhouseDataPartCorrupted"`
+	DiskUsageHigh                        IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull                       IntValAlert `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
