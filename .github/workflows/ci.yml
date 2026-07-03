@@ -45,6 +45,7 @@ jobs:
     strategy:
       matrix:
         chart:
+          - clickhouse-alerts
           - cassandra-alerts
           - connect-cluster-alerts
           - druid-alerts
