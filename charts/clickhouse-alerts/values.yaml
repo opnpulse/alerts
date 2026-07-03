@@ -1,7 +1,7 @@
 metadata:
   resource:
     group: kubedb.com
-    kind: Clickhouse
+    kind: ClickHouse
     name: clickhouses
     scope: Namespaced
     version: v1alpha2
@@ -15,7 +15,7 @@ form:
   alert:
     ## Suffix appended to .Release.Name to form the application name ($app).
     ## Leave empty for standalone deployments. Set when deployed as a subchart
-    ## to match the KubeDB resource suffix (e.g. "-ch" for Clickhouse).
+    ## to match the KubeDB resource suffix (e.g. "-ch" for ClickHouse).
     appSuffix: ""
 
     ## Enable PrometheusRule alerts
@@ -47,12 +47,20 @@ form:
             duration: "5m"
             val: 400
             severity: critical
-          clickhouseSlowQueries:
+          clickhouseTooManyActiveQueries:
             enabled: true
             duration: "1m"
             val: 500
             severity: warning
-          clickhouseReplicationLag:
+          clickhouseReplicationPartFetchFailed:
+            enabled: true
+            duration: "5m"
+            severity: warning
+          clickhouseBrokenPartsDetected:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          clickhouseDataPartCorrupted:
             enabled: true
             duration: "5m"
             severity: warning

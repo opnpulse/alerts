@@ -761,8 +761,10 @@ func (in *ClickhouseDatabaseAlertRules) DeepCopyInto(out *ClickhouseDatabaseAler
 	*out = *in
 	out.ClickhouseInstanceDown = in.ClickhouseInstanceDown
 	out.ClickhouseTooManyConnections = in.ClickhouseTooManyConnections
-	out.ClickhouseSlowQueries = in.ClickhouseSlowQueries
-	out.ClickhouseReplicationLag = in.ClickhouseReplicationLag
+	out.ClickhouseTooManyActiveQueries = in.ClickhouseTooManyActiveQueries
+	out.ClickhouseReplicationPartFetchFailed = in.ClickhouseReplicationPartFetchFailed
+	out.ClickhouseBrokenPartsDetected = in.ClickhouseBrokenPartsDetected
+	out.ClickhouseDataPartCorrupted = in.ClickhouseDataPartCorrupted
 	out.DiskUsageHigh = in.DiskUsageHigh
 	out.DiskAlmostFull = in.DiskAlmostFull
 	return

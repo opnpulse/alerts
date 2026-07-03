@@ -8,23 +8,31 @@
 - #### ClickhouseTooManyConnections
   - Increase ClickHouse `max_connections` setting in users.xml or via KubeDB configuration
   - Check for application connection leaks
-- #### ClickhouseSlowQueries
+- #### ClickhouseTooManyActiveQueries
   - Check for long-running queries using `system.processes` table
-  - Optimize slow queries or adjust `max_execution_time` settings
-- #### ClickhouseReplicationLag
+  - Consider tuning `max_concurrent_queries` setting
+  - Check for queries stuck waiting on resources (memory, disk I/O)
+- #### ClickhouseReplicationPartFetchFailed
   - Check network connectivity between replicas
   - Verify ZooKeeper/ClickHouse Keeper cluster health
   - Check `system.replication_queue` for stuck tasks
-- #### ClickhouseMergeErrors
-  - Check `system.merges` and `system.part_log` for errors
-  - Ensure sufficient disk space for merge operations
-  - Check `system.errors` for relevant error codes
-- #### ClickhouseExporterError
-  - Check ClickHouse exporter logs for configuration errors
-  - Verify exporter can connect to ClickHouse server
-- #### ClickhouseRestarted
-  - Check if `ClickHouse` CR is in Ready status
-  - Contact AppsCode team if status is not updated.
+- #### ClickhouseBrokenPartsDetected
+  - Check ClickHouse logs for `TOO_MANY_UNEXPECTED_DATA_PARTS` errors
+  - Identify the affected table from the error message
+  - Detach and reattach the broken parts manually, or restore from backup
+  - If caused by a version upgrade, check ClickHouse release notes for backward incompatibility
+- #### ClickhouseDataPartCorrupted
+  - Check ClickHouse logs for `CANNOT_PARSE_INPUT_ASSERTION_FAILED` errors
+  - Identify which data parts have zero-byte or corrupted `columns.txt` files
+  - Detach broken parts with `ALTER TABLE ... DETACH PARTITION`
+  - Restore affected data from backup
+  - Investigate root cause: improper shutdown, disk full, or storage issues
+- #### DiskUsageHigh
+  - Check PVC usage and increase storage if needed
+  - Review data retention policies
+- #### DiskAlmostFull
+  - Increase PVC storage immediately
+  - Clean up old data or snapshots to free space
 
 ### KubeDB Provisioner
 

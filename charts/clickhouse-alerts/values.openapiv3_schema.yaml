@@ -33,6 +33,40 @@ properties:
                     type: string
                   rules:
                     properties:
+                      clickhouseBrokenPartsDetected:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      clickhouseDataPartCorrupted:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
                       clickhouseInstanceDown:
                         properties:
                           duration:
@@ -50,7 +84,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      clickhouseReplicationLag:
+                      clickhouseReplicationPartFetchFailed:
                         properties:
                           duration:
                             type: string
@@ -67,7 +101,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      clickhouseSlowQueries:
+                      clickhouseTooManyActiveQueries:
                         properties:
                           duration:
                             type: string
@@ -148,9 +182,11 @@ properties:
                         - val
                         type: object
                     required:
+                    - clickhouseBrokenPartsDetected
+                    - clickhouseDataPartCorrupted
                     - clickhouseInstanceDown
-                    - clickhouseReplicationLag
-                    - clickhouseSlowQueries
+                    - clickhouseReplicationPartFetchFailed
+                    - clickhouseTooManyActiveQueries
                     - clickhouseTooManyConnections
                     - diskAlmostFull
                     - diskUsageHigh

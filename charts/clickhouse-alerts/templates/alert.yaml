@@ -43,27 +43,49 @@ spec:
         summary: ClickHouse too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "ClickHouse instance has more than {{ .rules.clickhouseTooManyConnections.val }} TCP connections on {{`{{`}} $labels.instance {{`}}`}}."
     {{end -}}
-    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseSlowQueries.enabled .rules.clickhouseSlowQueries.severity)) -}}
-    - alert: ClickhouseSlowQueries
-      expr: ClickHouseMetrics_Query{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseSlowQueries.val }}
-      for: {{ .rules.clickhouseSlowQueries.duration }}
+    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseTooManyActiveQueries.enabled .rules.clickhouseTooManyActiveQueries.severity)) -}}
+    - alert: ClickhouseTooManyActiveQueries
+      expr: ClickHouseMetrics_Query{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseTooManyActiveQueries.val }}
+      for: {{ .rules.clickhouseTooManyActiveQueries.duration }}
       labels:
-        severity: {{ .rules.clickhouseSlowQueries.severity }}
+        severity: {{ .rules.clickhouseTooManyActiveQueries.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ClickHouse too many active queries (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse has more than {{ .rules.clickhouseSlowQueries.val }} active queries on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "ClickHouse has more than {{ .rules.clickhouseTooManyActiveQueries.val }} active queries on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseReplicationLag.enabled .rules.clickhouseReplicationLag.severity)) -}}
-    - alert: ClickhouseReplicationLag
+    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseReplicationPartFetchFailed.enabled .rules.clickhouseReplicationPartFetchFailed.severity)) -}}
+    - alert: ClickhouseReplicationPartFetchFailed
       expr: increase(ClickHouseProfileEvents_ReplicatedPartFailedFetches{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
-      for: {{ .rules.clickhouseReplicationLag.duration }}
+      for: {{ .rules.clickhouseReplicationPartFetchFailed.duration }}
       labels:
-        severity: {{ .rules.clickhouseReplicationLag.severity }}
+        severity: {{ .rules.clickhouseReplicationPartFetchFailed.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse replication failures (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse has replication part fetch failures on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse replication part fetch failed (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "ClickHouse failed to download data parts from replica on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseBrokenPartsDetected.enabled .rules.clickhouseBrokenPartsDetected.severity)) -}}
+    - alert: ClickhouseBrokenPartsDetected
+      expr: increase(ClickHouseErrorMetric_TOO_MANY_UNEXPECTED_DATA_PARTS{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
+      for: {{ .rules.clickhouseBrokenPartsDetected.duration }}
+      labels:
+        severity: {{ .rules.clickhouseBrokenPartsDetected.severity }}
+        {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse too many broken data parts (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "ClickHouse detected too many broken/unexpected data parts and refused to attach a table on {{`{{`}} $labels.instance {{`}}`}}. This may indicate disk corruption or backward incompatibility after an upgrade.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseDataPartCorrupted.enabled .rules.clickhouseDataPartCorrupted.severity)) -}}
+    - alert: ClickhouseDataPartCorrupted
+      expr: increase(ClickHouseErrorMetric_CANNOT_PARSE_INPUT_ASSERTION_FAILED{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
+      for: {{ .rules.clickhouseDataPartCorrupted.duration }}
+      labels:
+        severity: {{ .rules.clickhouseDataPartCorrupted.severity }}
+        {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse data part corruption detected (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "ClickHouse failed to parse data part metadata on {{`{{`}} $labels.instance {{`}}`}}. Parts may have zero-byte files due to improper shutdown, disk issues, or version incompatibility.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
 
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
