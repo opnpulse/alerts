@@ -110,6 +110,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&NATSAlertsList{},
 		&B3Alerts{},
 		&B3AlertsList{},
+		&ClickhouseAlerts{},
+		&ClickhouseAlertsList{},
 	)
 
 	scheme.AddKnownTypes(SchemeGroupVersion,

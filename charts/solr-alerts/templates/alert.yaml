@@ -109,7 +109,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "solr-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -121,7 +121,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "solr-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
