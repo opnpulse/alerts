@@ -2,8 +2,8 @@ apiVersion: v2
 name: b3-alerts
 description: A Helm chart for B3 Platform Alert Rules
 type: application
-version: v2026.2.24
-appVersion: v1.0.0
+version: v2026.7.14
+appVersion: v1.1.0
 home: https://github.com/bytebuilders/b3
 icon: https://byte.builders/assets/images/product/b3.png
 sources:
