@@ -168,7 +168,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the warning threshold."
     {{- end }}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -190,7 +190,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "postgres-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the critical threshold."
     {{- end }}
   {{ end -}}

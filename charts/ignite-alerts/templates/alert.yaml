@@ -29,7 +29,7 @@ spec:
         severity: {{ .rules.igniteDown.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Ignite database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Ignite database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ignitePhaseCritical.enabled .rules.ignitePhaseCritical.severity)) -}}
@@ -40,7 +40,7 @@ spec:
         severity: {{ .rules.ignitePhaseCritical.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Ignite database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Ignite database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteClusterNoBaselineNode.enabled .rules.igniteClusterNoBaselineNode.severity)) -}}
@@ -118,7 +118,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "ignite-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -130,7 +130,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "ignite-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

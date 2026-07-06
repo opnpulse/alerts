@@ -29,7 +29,7 @@ spec:
         severity: {{ .rules.mongodbVirtualMemoryUsage.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbReplicationLag.enabled .rules.mongodbReplicationLag.severity)) -}}
@@ -40,7 +40,7 @@ spec:
         severity: {{ .rules.mongodbReplicationLag.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database has replication lag (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Mongodb replication lag is more than {{ .rules.mongodbReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbNumberCursorsOpen.enabled .rules.mongodbNumberCursorsOpen.severity)) -}}
@@ -51,7 +51,7 @@ spec:
         severity: {{ .rules.mongodbNumberCursorsOpen.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB number cursors open (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many cursors opened by MongoDB for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbCursorsTimeouts.enabled .rules.mongodbCursorsTimeouts.severity)) -}}
@@ -62,7 +62,7 @@ spec:
         severity: {{ .rules.mongodbCursorsTimeouts.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbTooManyConnections.enabled .rules.mongodbTooManyConnections.severity)) -}}
@@ -73,7 +73,7 @@ spec:
         severity: {{ .rules.mongodbTooManyConnections.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBPhaseCritical.enabled .rules.mongoDBPhaseCritical.severity)) -}}
@@ -84,7 +84,7 @@ spec:
         severity: {{ .rules.mongoDBPhaseCritical.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBDown.enabled .rules.mongoDBDown.severity)) -}}
@@ -95,7 +95,7 @@ spec:
         severity: {{ .rules.mongoDBDown.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbHighLatency.enabled .rules.mongodbHighLatency.severity)) -}}
@@ -108,7 +108,7 @@ spec:
         severity: {{ .rules.mongodbHighLatency.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: High latency in mongodb instances {{`{{`}} $labels.instance {{`}}`}}
+        summary: High latency in mongodb instances {{`{{`}} $labels.pod {{`}}`}}
         description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbHighTicketUtilization.enabled .rules.mongodbHighTicketUtilization.severity)) -}}
@@ -122,7 +122,7 @@ spec:
         severity: {{ .rules.mongodbHighTicketUtilization.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
+        summary: Ticket usage over 75% {{`{{`}} $labels.pod {{`}}`}}
         description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbRecurrentCursorTimeout.enabled .rules.mongodbRecurrentCursorTimeout.severity)) -}}
@@ -133,7 +133,7 @@ spec:
         severity: {{ .rules.mongodbRecurrentCursorTimeout.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbRecurrentMemoryPageFaults.enabled .rules.mongodbRecurrentMemoryPageFaults.severity)) -}}
@@ -144,7 +144,7 @@ spec:
         severity: {{ .rules.mongodbRecurrentMemoryPageFaults.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Recurrent memory page faults in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
@@ -157,7 +157,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "mongodb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -169,7 +169,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "mongodb-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

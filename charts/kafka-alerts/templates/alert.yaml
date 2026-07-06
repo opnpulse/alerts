@@ -29,7 +29,7 @@ spec:
         severity: {{ .rules.kafkaUnderReplicatedPartitions.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka under replicated partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka under replicated partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} under replicated partitions.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaAbnormalControllerState.enabled .rules.kafkaAbnormalControllerState.severity)) -}}
@@ -40,7 +40,7 @@ spec:
         severity: {{ .rules.kafkaAbnormalControllerState.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: At least one active controller must be acting (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: At least one active controller must be acting (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} active controllers.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaOfflinePartitions.enabled .rules.kafkaOfflinePartitions.severity)) -}}
@@ -51,7 +51,7 @@ spec:
         severity: {{ .rules.kafkaOfflinePartitions.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka offline partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka offline partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "One or more partitions have no leader.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaUnderMinIsrPartitionCount.enabled .rules.kafkaUnderMinIsrPartitionCount.severity)) -}}
@@ -62,7 +62,7 @@ spec:
         severity: {{ .rules.kafkaUnderMinIsrPartitionCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka under min ISR partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka under min ISR partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} partitions under the min ISR.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaOfflineLogDirectoryCount.enabled .rules.kafkaOfflineLogDirectoryCount.severity)) -}}
@@ -73,7 +73,7 @@ spec:
         severity: {{ .rules.kafkaOfflineLogDirectoryCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka offline log directories (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka offline log directories (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} offline log directories.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaISRExpandRate.enabled .rules.kafkaISRExpandRate.severity)) -}}
@@ -84,7 +84,7 @@ spec:
         severity: {{ .rules.kafkaISRExpandRate.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka ISR Expansion Rate (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka ISR Expansion Rate (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "If a broker goes down, ISR for some of the partitions shrink. When that broker is up again, ISRs are expanded once the replicas are fully caught up. Other than that, the expected value for ISR expansion rate is 0. If ISR is expanding and shrinking frequently, adjust Allowed replica lag..\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaISRShrinkRate.enabled .rules.kafkaISRShrinkRate.severity)) -}}
@@ -95,7 +95,7 @@ spec:
         severity: {{ .rules.kafkaISRShrinkRate.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka ISR Shrink Rate (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka ISR Shrink Rate (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "If a broker goes down, ISR for some of the partitions shrink. When that broker is up again, ISRs are expanded once the replicas are fully caught up. Other than that, the expected value for ISR shrink rate is 0. If ISR is expanding and shrinking frequently, adjust Allowed replica lag.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaBrokerCount.enabled .rules.kafkaBrokerCount.severity)) -}}
@@ -107,7 +107,7 @@ spec:
         severity: {{ .rules.kafkaBrokerCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: No Kafka Brokers online! (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: No Kafka Brokers online! (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Broker count is 0.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaNetworkProcessorIdlePercent.enabled .rules.kafkaNetworkProcessorIdlePercent.severity)) -}}
@@ -118,7 +118,7 @@ spec:
         severity: {{ .rules.kafkaNetworkProcessorIdlePercent.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka Network Processor Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka Network Processor Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The average fraction of time the network processors are idle. A lower value {{`{{`}} $value {{`}}`}} indicates that the network workload of the broker is very high.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaRequestHandlerIdlePercent.enabled .rules.kafkaRequestHandlerIdlePercent.severity)) -}}
@@ -129,7 +129,7 @@ spec:
         severity: {{ .rules.kafkaRequestHandlerIdlePercent.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka Request Handler Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka Request Handler Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The average fraction of time the request handler threads (IO) are idle. A lower value indicates that the workload of a broker is very high.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaReplicaFetcherManagerMaxLag.enabled .rules.kafkaReplicaFetcherManagerMaxLag.severity)) -}}
@@ -140,7 +140,7 @@ spec:
         severity: {{ .rules.kafkaReplicaFetcherManagerMaxLag.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Replica Fetcher Manager Max Lag is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Replica Fetcher Manager Max Lag is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The maximum lag between the time that messages are received by the leader replica and by the follower replicas.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaTopicCount.enabled .rules.kafkaTopicCount.severity)) -}}
@@ -152,7 +152,7 @@ spec:
         severity: {{ .rules.kafkaTopicCount.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka 1000 topics reached (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka 1000 topics reached (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The number of active topics in the cluster has reached 1000.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
@@ -165,7 +165,7 @@ spec:
         severity: {{ .rules.kafkaPhaseCritical.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.kafkaDown.enabled .rules.kafkaDown.severity)) -}}
@@ -176,7 +176,7 @@ spec:
         severity: {{ .rules.kafkaDown.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
@@ -189,7 +189,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kafka-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -201,7 +201,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kafka-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

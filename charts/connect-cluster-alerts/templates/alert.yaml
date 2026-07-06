@@ -30,7 +30,7 @@ spec:
         severity: {{ .rules.connectClusterWorkerDown.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: No ConnectCluster Worker Online! (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: No ConnectCluster Worker Online! (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Worker Count is 0.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTooManyConnections.enabled .rules.connectClusterTooManyConnections.severity)) -}}
@@ -52,7 +52,7 @@ spec:
         severity: {{ .rules.connectClusterConnectorCount.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ConnectCluster has reached connectors threshold. (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: ConnectCluster has reached connectors threshold. (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.connectClusterConnectorCount.val}}% of Connectors are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterCoordinatorRebalanceFailed.enabled .rules.connectClusterCoordinatorRebalanceFailed.severity)) -}}
@@ -63,7 +63,7 @@ spec:
         severity: {{ .rules.connectClusterCoordinatorRebalanceFailed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ConnectCluster total re-balance exceeds the threshold (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: ConnectCluster total re-balance exceeds the threshold (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ConnectCluster coordinator re-balance exceeds {{.rules.connectClusterConnectorCount.val}}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
@@ -81,7 +81,7 @@ spec:
         severity: {{ .rules.connectClusterTaskErrorTotalRetries.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ConnectCluster task error total retries exceeds. (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: ConnectCluster task error total retries exceeds. (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ConnectCluster task error total error exceeds the threshold value {{.rules.connectClusterTaskErrorTotalRetries.val}}%.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotal.enabled .rules.connectClusterTaskTotal.severity)) -}}
@@ -92,7 +92,7 @@ spec:
         severity: {{ .rules.connectClusterTaskTotal.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ConnectCluster has reached task threshold. (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: ConnectCluster has reached task threshold. (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.connectClusterTaskTotal.val}} task are running.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotalFailed.enabled .rules.connectClusterTaskTotalFailed.severity)) -}}
@@ -103,7 +103,7 @@ spec:
         severity: {{ .rules.connectClusterTaskTotalFailed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Task Failed (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Task Failed (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Some task are failed.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "connectcluster-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.connectClusterTaskTotalDestroyed.enabled .rules.connectClusterTaskTotalDestroyed.severity)) -}}
@@ -114,7 +114,7 @@ spec:
         severity: {{ .rules.connectClusterTaskTotalDestroyed.severity }}
         {{- include "connectcluster-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Task Destroyed (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Task Destroyed (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Some task are destroyed.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

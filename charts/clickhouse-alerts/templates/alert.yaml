@@ -29,8 +29,8 @@ spec:
         severity: {{ .rules.clickhouseInstanceDown.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse instance down (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse instance is down on {{`{{`}} $labels.instance {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse instance down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseTooManyConnections.enabled .rules.clickhouseTooManyConnections.severity)) -}}
     - alert: ClickhouseTooManyConnections
@@ -40,8 +40,8 @@ spec:
         severity: {{ .rules.clickhouseTooManyConnections.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse instance has more than {{ .rules.clickhouseTooManyConnections.val }} TCP connections on {{`{{`}} $labels.instance {{`}}`}}."
+        summary: ClickHouse too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse instance has more than {{ .rules.clickhouseTooManyConnections.val }} TCP connections on {{`{{`}} $labels.pod {{`}}`}}."
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseTooManyActiveQueries.enabled .rules.clickhouseTooManyActiveQueries.severity)) -}}
     - alert: ClickhouseTooManyActiveQueries
@@ -51,8 +51,8 @@ spec:
         severity: {{ .rules.clickhouseTooManyActiveQueries.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse too many active queries (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse has more than {{ .rules.clickhouseTooManyActiveQueries.val }} active queries on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse too many active queries (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse has more than {{ .rules.clickhouseTooManyActiveQueries.val }} active queries on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseReplicationPartFetchFailed.enabled .rules.clickhouseReplicationPartFetchFailed.severity)) -}}
     - alert: ClickhouseReplicationPartFetchFailed
@@ -62,8 +62,8 @@ spec:
         severity: {{ .rules.clickhouseReplicationPartFetchFailed.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse replication part fetch failed (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse failed to download data parts from replica on {{`{{`}} $labels.instance {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse replication part fetch failed (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse failed to download data parts from replica on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseBrokenPartsDetected.enabled .rules.clickhouseBrokenPartsDetected.severity)) -}}
     - alert: ClickhouseBrokenPartsDetected
@@ -73,8 +73,8 @@ spec:
         severity: {{ .rules.clickhouseBrokenPartsDetected.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse too many broken data parts (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse detected too many broken/unexpected data parts and refused to attach a table on {{`{{`}} $labels.instance {{`}}`}}. This may indicate disk corruption or backward incompatibility after an upgrade.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse too many broken data parts (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse detected too many broken/unexpected data parts and refused to attach a table on {{`{{`}} $labels.pod {{`}}`}}. This may indicate disk corruption or backward incompatibility after an upgrade.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.clickhouseDataPartCorrupted.enabled .rules.clickhouseDataPartCorrupted.severity)) -}}
     - alert: ClickhouseDataPartCorrupted
@@ -84,8 +84,8 @@ spec:
         severity: {{ .rules.clickhouseDataPartCorrupted.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ClickHouse data part corruption detected (instance {{`{{`}} $labels.instance {{`}}`}})
-        description: "ClickHouse failed to parse data part metadata on {{`{{`}} $labels.instance {{`}}`}}. Parts may have zero-byte files due to improper shutdown, disk issues, or version incompatibility.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ClickHouse data part corruption detected (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse failed to parse data part metadata on {{`{{`}} $labels.pod {{`}}`}}. Parts may have zero-byte files due to improper shutdown, disk issues, or version incompatibility.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
 
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
@@ -99,7 +99,7 @@ spec:
         )
         * on(namespace, persistentvolumeclaim) group_left(pod)
         max by (namespace, persistentvolumeclaim, pod) (
-          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-.*"}
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(.*-shard-[0-9]+-[0-9]+|[0-9]+)$"}
         )
         > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
@@ -107,7 +107,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the warning threshold."
     {{- end }}
     {{ if (include "clickhouse-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
@@ -121,7 +121,7 @@ spec:
         )
         * on(namespace, persistentvolumeclaim) group_left(pod)
         max by (namespace, persistentvolumeclaim, pod) (
-          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-.*"}
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(.*-shard-[0-9]+-[0-9]+|[0-9]+)$"}
         )
         > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
@@ -129,7 +129,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "clickhouse-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the critical threshold."
     {{- end }}
   {{ end -}}
