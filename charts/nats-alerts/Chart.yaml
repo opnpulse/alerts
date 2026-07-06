@@ -2,8 +2,8 @@ apiVersion: v2
 name: nats-alerts
 description: A Helm chart for NATS JetStream Alert Rules
 type: application
-version: v2026.2.24
-appVersion: v1.0.0
+version: v2026.7.14
+appVersion: v1.1.0
 home: https://github.com/ops-center/nats-observability
 icon: https://nats.io/img/logos/nats-icon-color.png
 sources:

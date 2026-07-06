@@ -2,8 +2,8 @@ apiVersion: v2
 name: memcached-alerts
 description: A Helm chart for Memcached Alert by AppsCode
 type: application
-version: v2026.2.24
-appVersion: v0.6.0
+version: v2026.7.14
+appVersion: v0.7.0
 home: https://github.com/appscode/alerts
 icon: https://cdn.appscode.com/images/products/kubedb/kubedb-icon.png
 sources:

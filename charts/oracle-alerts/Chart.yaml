@@ -2,8 +2,8 @@ apiVersion: v2
 name: oracle-alerts
 description: A Helm chart for Oracle Alert by AppsCode
 type: application
-version: v2025.06.30
-appVersion: v0.5.0
+version: v2026.7.14
+appVersion: v0.6.0
 home: https://github.com/appscode/alerts
 icon: https://cdn.appscode.com/images/products/kubedb/kubedb-icon.png
 sources:
