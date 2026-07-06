@@ -80,10 +80,13 @@ properties:
                             - warning
                             - info
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
                       natsStaleConnections:
                         properties:
@@ -97,10 +100,13 @@ properties:
                             - warning
                             - info
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
                       natsStalledClients:
                         properties:
@@ -114,10 +120,13 @@ properties:
                             - warning
                             - info
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
                     required:
                     - natsHighActiveConnections

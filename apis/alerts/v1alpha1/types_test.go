@@ -27,7 +27,7 @@ import (
 
 func TestDefaultValues(t *testing.T) {
 	checker := sc.New(os.DirFS("../../.."),
-		sc.TestCase{Obj: v1alpha1.B3AlertsSpec{}},
+		sc.TestCase{Obj: v1alpha1.B3AlertsSpec{}, File: "charts/b3-alerts/values.yaml"},
 		sc.TestCase{Obj: v1alpha1.CassandraAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.ClickhouseAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.ConnectClusterAlertsSpec{}},
@@ -43,9 +43,9 @@ func TestDefaultValues(t *testing.T) {
 		sc.TestCase{Obj: v1alpha1.MongodbAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.MSSQLServerAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.MysqlAlertsSpec{}},
-		sc.TestCase{Obj: v1alpha1.NATSAlertsSpec{}},
+		sc.TestCase{Obj: v1alpha1.NATSAlertsSpec{}, File: "charts/nats-alerts/values.yaml"},
 		sc.TestCase{Obj: v1alpha1.Neo4jAlertsSpec{}},
-		sc.TestCase{Obj: v1alpha1.OpenFGAAlertsSpec{}},
+		sc.TestCase{Obj: v1alpha1.OpenFGAAlertsSpec{}, File: "charts/openfga-alerts/values.yaml"},
 		sc.TestCase{Obj: v1alpha1.OracleAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.PerconaxtradbAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.PgbouncerAlertsSpec{}},

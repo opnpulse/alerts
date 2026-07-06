@@ -28,7 +28,7 @@ const (
 	ResourcePostgresAlertss    = "postgresalertss"
 )
 
-// PostgresAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// PostgresAlerts defines the schema for Postgres Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type PostgresAlerts struct {
 	Spec              PostgresAlertsSpec `json:"spec,omitempty"`
 }
 
-// PostgresAlertsSpec is the schema for kubedb-autoscaler chart values file
+// PostgresAlertsSpec is the schema for Postgres alerts chart values file
 type PostgresAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PostgresAlertsSpecForm `json:"form"`
