@@ -34,7 +34,7 @@ spec:
     {{end -}}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresSplitBrain.enabled .rules.postgresSplitBrain.severity)) -}}
     - alert: PostgresqlSplitBrain
-      expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0) != 1
+      expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0) != 1 and count(pg_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 1) > 0
       for: {{ .rules.postgresSplitBrain.duration }}
       labels:
         job: {{ $app }}-stats
@@ -162,7 +162,7 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
         )
-        > {{ .rules.diskUsageHigh.val }}
+        > {{ .rules.diskUsageHigh.val }} < {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}

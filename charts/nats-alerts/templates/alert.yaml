@@ -115,7 +115,7 @@ spec:
     rules:
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighMemoryUsage.enabled .rules.natsJetStreamHighMemoryUsage.severity)) }}
     - alert: NatsJetStreamHighMemoryUsage
-      expr: (nats_varz_jetstream_stats_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighMemoryUsage.val }}
+      expr: (nats_varz_jetstream_stats_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighMemoryUsage.val }} and nats_varz_jetstream_config_max_memory{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.natsJetStreamHighMemoryUsage.duration }}
       labels:
         severity: {{ .rules.natsJetStreamHighMemoryUsage.severity }}
@@ -126,7 +126,7 @@ spec:
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsJetStreamHighStorageUsage.enabled .rules.natsJetStreamHighStorageUsage.severity)) }}
     - alert: NatsJetStreamHighStorageUsage
-      expr: (nats_varz_jetstream_stats_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighStorageUsage.val }}
+      expr: (nats_varz_jetstream_stats_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} / nats_varz_jetstream_config_max_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} * 100) > {{ .rules.natsJetStreamHighStorageUsage.val }} and nats_varz_jetstream_config_max_storage{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.natsJetStreamHighStorageUsage.duration }}
       labels:
         severity: {{ .rules.natsJetStreamHighStorageUsage.severity }}

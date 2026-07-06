@@ -46,7 +46,7 @@ spec:
     {{- end }}
     {{ if (include "openfga-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highErrorRate.enabled .rules.highErrorRate.severity)) -}}
     - alert: OpenFGAHighErrorRate
-      expr: sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService",grpc_code!="OK"}[5m])) / sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) * 100 > {{ .rules.highErrorRate.val }}
+      expr: sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService",grpc_code=~"Internal|Unknown|Unavailable|DataLoss|DeadlineExceeded|ResourceExhausted"}[5m])) / sum(rate(grpc_server_handled_total{job="{{ $job }}",namespace="{{ $.Release.Namespace }}",grpc_service="openfga.v1.OpenFGAService"}[5m])) * 100 > {{ .rules.highErrorRate.val }}
       for: {{ .rules.highErrorRate.duration }}
       labels:
         severity: {{ .rules.highErrorRate.severity }}

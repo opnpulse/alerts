@@ -34,7 +34,7 @@ spec:
     {{end -}}
     {{ if (include "redis-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisMissingMaster.enabled .rules.redisMissingMaster.severity)) -}}
     - alert: RedisMissingMaster
-      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",role="master"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
       for: {{ .rules.redisMissingMaster.duration }}
       labels:
         job: {{ $app }}-stats
@@ -46,18 +46,18 @@ spec:
     {{end -}}
     {{ if (include "redis-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisTooManyConnections.enabled .rules.redisTooManyConnections.severity)) -}}
     - alert: RedisTooManyConnections
-      expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.redisTooManyConnections.val}}
+      expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} / redis_config_maxclients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.redisTooManyConnections.val}}
       for: {{ .rules.redisTooManyConnections.duration }}
       labels:
         severity: {{ .rules.redisTooManyConnections.severity }}
         {{- include "redis-alerts.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Redis too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis instance has too many connections . More than {{.rules.redisTooManyConnections.val}} of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Redis instance has too many connections . More than {{.rules.redisTooManyConnections.val}}% of maxclients are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if (include "redis-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisTooManyMasters.enabled .rules.redisTooManyMasters.severity)) -}}
     - alert: RedisTooManyMasters
-      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.redisTooManyMasters.val}}
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",role="master"})) > {{.rules.redisTooManyMasters.val}}
       for: {{ .rules.redisTooManyMasters.duration }}
       labels:
         job: {{ $app }}-stats
@@ -92,7 +92,7 @@ spec:
         max by (namespace, persistentvolumeclaim, pod) (
           kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
         )
-        > {{ .rules.diskUsageHigh.val }}
+        > {{ .rules.diskUsageHigh.val }} < {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
