@@ -28,7 +28,7 @@ const (
 	ResourceClickhouseAlertss    = "clickhousealertss"
 )
 
-// ClickhouseAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// ClickhouseAlerts defines the schema for ClickHouse Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type ClickhouseAlerts struct {
 	Spec              ClickhouseAlertsSpec `json:"spec,omitempty"`
 }
 
-// ClickhouseAlertsSpec is the schema for kubedb-autoscaler chart values file
+// ClickhouseAlertsSpec is the schema for ClickHouse alerts chart values file
 type ClickhouseAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ClickhouseAlertsSpecForm `json:"form"`

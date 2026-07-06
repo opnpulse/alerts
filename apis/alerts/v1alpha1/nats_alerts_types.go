@@ -119,9 +119,9 @@ type NATSConnectivityAlert struct {
 
 type NATSConnectivityAlertRules struct {
 	NatsJetStreamDisabled     FixedAlert  `json:"natsJetStreamDisabled"`
-	NatsSlowConsumers         FixedAlert  `json:"natsSlowConsumers"`
-	NatsStalledClients        FixedAlert  `json:"natsStalledClients"`
-	NatsStaleConnections      FixedAlert  `json:"natsStaleConnections"`
+	NatsSlowConsumers         IntValAlert `json:"natsSlowConsumers"`
+	NatsStalledClients        IntValAlert `json:"natsStalledClients"`
+	NatsStaleConnections      IntValAlert `json:"natsStaleConnections"`
 	NatsHighActiveConnections IntValAlert `json:"natsHighActiveConnections"`
 }
 

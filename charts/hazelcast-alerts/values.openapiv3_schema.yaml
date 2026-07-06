@@ -71,6 +71,23 @@ properties:
                         - severity
                         - val
                         type: object
+                      hazelcastDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
                       hazelcastHighHeapPercentage:
                         properties:
                           duration:
@@ -104,7 +121,8 @@ properties:
                             - info
                             type: string
                           val:
-                            type: integer
+                            format: double
+                            type: number
                         required:
                         - duration
                         - enabled
@@ -171,6 +189,23 @@ properties:
                         - severity
                         - val
                         type: object
+                      hazelcastPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
                       hazelcastSystemCPULoadExceed:
                         properties:
                           duration:
@@ -194,11 +229,13 @@ properties:
                     required:
                     - diskAlmostFull
                     - diskUsageHigh
+                    - hazelcastDown
                     - hazelcastHighHeapPercentage
                     - hazelcastHighLatency
                     - hazelcastHighMemoryUsage
                     - hazelcastHighPhysicalMemoryUsage
                     - hazelcastPartitionCountExceed
+                    - hazelcastPhaseCritical
                     - hazelcastSystemCPULoadExceed
                     type: object
                 required:
