@@ -57,6 +57,7 @@ func TestDefaultValues(t *testing.T) {
 		sc.TestCase{Obj: v1alpha1.RedisAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.SinglestoreAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.SolrAlertsSpec{}},
+		sc.TestCase{Obj: v1alpha1.WeaviateAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.VaultserverAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.ZookeeperAlertsSpec{}},
 	)

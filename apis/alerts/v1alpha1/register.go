@@ -104,6 +104,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&SinglestoreAlertsList{},
 		&SolrAlerts{},
 		&SolrAlertsList{},
+		&WeaviateAlerts{},
+		&WeaviateAlertsList{},
 		&VaultserverAlerts{},
 		&VaultserverAlertsList{},
 		&NATSAlerts{},

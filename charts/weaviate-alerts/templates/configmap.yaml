@@ -1,0 +1,196 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "weaviate-alerts.fullname" . }}-configmap
+  labels:
+    {{- include "weaviate-alerts.labels" . | nindent 4 }}
+data:
+  grafana-json.json: |-
+    {
+      "dashboard": {
+        "id": null,
+        "uid": null,
+        "title": "KubeDB / Weaviate / Alerts",
+        "tags": ["kubedb", "weaviate", "alerts"],
+        "timezone": "browser",
+        "schemaVersion": 27,
+        "version": 0,
+        "refresh": "10s",
+        "panels": [
+          {
+            "id": 1,
+            "type": "graph",
+            "title": "Weaviate Up",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+            "targets": [
+              {"expr": "up{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 2,
+            "type": "graph",
+            "title": "KubeDB Phase",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+            "targets": [
+              {"expr": "kubedb_com_weaviate_status_phase{phase=\"NotReady\",app=\"{{ $.Release.Name }}\",namespace=\"{{ $.Release.Namespace }}\"} or kubedb_com_weaviate_status_phase{phase=\"NotReady\",app=\"{{ $.Release.Name }}\",app_namespace=\"{{ $.Release.Namespace }}\"}", "legendFormat": "NotReady", "refId": "A"},
+              {"expr": "kubedb_com_weaviate_status_phase{phase=\"Critical\",app=\"{{ $.Release.Name }}\",namespace=\"{{ $.Release.Namespace }}\"} or kubedb_com_weaviate_status_phase{phase=\"Critical\",app=\"{{ $.Release.Name }}\",app_namespace=\"{{ $.Release.Namespace }}\"}", "legendFormat": "Critical", "refId": "B"}
+            ]
+          },
+          {
+            "id": 3,
+            "type": "graph",
+            "title": "Recent Restarts",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+            "targets": [
+              {"expr": "(time() - min by (pod) (kube_pod_start_time{namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\"})) < 180", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 4,
+            "type": "graph",
+            "title": "CPU Usage Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+            "targets": [
+              {"expr": "(sum by (pod) (irate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",job=\"kubelet\",metrics_path=\"/metrics/cadvisor\",namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\"}[5m])) / sum by (pod) (kube_pod_container_resource_requests{namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\",resource=\"cpu\"})) * 100", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 5,
+            "type": "graph",
+            "title": "Memory Usage Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+            "targets": [
+              {"expr": "(sum by (pod) (container_memory_working_set_bytes{namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\",container!=\"\",image!=\"\"}) / sum by (pod) (kube_pod_container_resource_limits{namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\",resource=\"memory\"})) * 100", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 6,
+            "type": "graph",
+            "title": "Process Memory",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+            "targets": [
+              {"expr": "process_resident_memory_bytes{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 7,
+            "type": "graph",
+            "title": "Go Goroutines",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+            "targets": [
+              {"expr": "go_goroutines{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 8,
+            "type": "graph",
+            "title": "Go Threads",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+            "targets": [
+              {"expr": "go_threads{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 9,
+            "type": "graph",
+            "title": "Open FDs Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+            "targets": [
+              {"expr": "(process_open_fds{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"} / process_max_fds{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}) * 100", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 10,
+            "type": "graph",
+            "title": "Disk Usage Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 24},
+            "targets": [
+              {"expr": "(kubelet_volume_stats_used_bytes{job=\"kubelet\",metrics_path=\"/metrics\"} / kubelet_volume_stats_capacity_bytes{job=\"kubelet\",metrics_path=\"/metrics\"}) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace=\"{{ $.Release.Namespace }}\",pod=~\"{{ $.Release.Name }}-[0-9]+\"} * 100", "legendFormat": {{ `"{{pod}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 11,
+            "type": "graph",
+            "title": "HTTP Error Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 24},
+            "targets": [
+              {"expr": "100 * ((sum(rate(weaviate_http_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\",status_code=~\"4..|5..\"}[5m])) or sum(rate(http_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\",status_code=~\"4..|5..\"}[5m]))) / clamp_min((sum(rate(weaviate_http_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m])) or sum(rate(http_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m]))), 1))", "legendFormat": "HTTP errors", "refId": "A"}
+            ]
+          },
+          {
+            "id": 12,
+            "type": "graph",
+            "title": "HTTP P95 Latency",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 24},
+            "targets": [
+              {"expr": "histogram_quantile(0.95, sum by (le, route) (rate(weaviate_http_request_duration_seconds_bucket{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m]))) or histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m])))", "legendFormat": {{ `"{{route}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 13,
+            "type": "graph",
+            "title": "gRPC Error Percent",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 32},
+            "targets": [
+              {"expr": "100 * ((sum(rate(weaviate_grpc_server_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\",status!=\"OK\"}[5m])) or sum(rate(grpc_server_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\",status!=\"OK\"}[5m]))) / clamp_min((sum(rate(weaviate_grpc_server_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m])) or sum(rate(grpc_server_request_duration_seconds_count{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m]))), 1))", "legendFormat": "gRPC errors", "refId": "A"}
+            ]
+          },
+          {
+            "id": 14,
+            "type": "graph",
+            "title": "gRPC P95 Latency",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 32},
+            "targets": [
+              {"expr": "histogram_quantile(0.95, sum by (le, grpc_service, method) (rate(weaviate_grpc_server_request_duration_seconds_bucket{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m]))) or histogram_quantile(0.95, sum by (le, grpc_service, method) (rate(grpc_server_request_duration_seconds_bucket{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m])))", "legendFormat": {{ `"{{grpc_service}} {{method}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 15,
+            "type": "graph",
+            "title": "Replication Engine Status",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 32},
+            "targets": [
+              {"expr": "min by (pod, node) (weaviate_replication_engine_running_status{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"})", "legendFormat": {{ `"{{pod}} {{node}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 16,
+            "type": "graph",
+            "title": "Replication Pending Operations",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 40},
+            "targets": [
+              {"expr": "sum by (node) (weaviate_replication_pending_operations{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"})", "legendFormat": {{ `"{{node}}"` }}, "refId": "A"}
+            ]
+          },
+          {
+            "id": 17,
+            "type": "graph",
+            "title": "Replication Failures Rate",
+            "datasource": null,
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 40},
+            "targets": [
+              {"expr": "sum by (node) (rate(weaviate_replication_failed_operations{namespace=\"{{ $.Release.Namespace }}\",service=\"{{ $.Release.Name }}-stats\"}[5m]))", "legendFormat": {{ `"{{node}}"` }}, "refId": "A"}
+            ]
+          }
+        ]
+      },
+      "overwrite": true
+    }
+{{- end }}
