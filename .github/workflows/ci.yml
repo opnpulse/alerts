@@ -65,6 +65,7 @@ jobs:
           - redis-alerts
           - singlestore-alerts
           - solr-alerts
+          - weaviate-alerts
           - vaultserver-alerts
           - zookeeper-alerts
     steps:
