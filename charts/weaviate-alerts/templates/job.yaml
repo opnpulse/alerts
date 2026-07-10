@@ -1,0 +1,36 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "weaviate-alerts.fullname" . }}-post-job
+  labels:
+    {{- include "weaviate-alerts.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      volumes:
+        - name: grafana-json-volume
+          configMap:
+            name: {{ include "weaviate-alerts.fullname" . }}-configmap
+      containers:
+        - name: post-json-container
+          image: curlimages/curl:latest
+          command: ["curl"]
+          args:
+            - "-X"
+            - "POST"
+            - "-H"
+            - "Content-Type: application/json"
+            - "-H"
+            - "Authorization: Bearer {{ .Values.grafana.apikey }}"
+            - "--data-binary"
+            - "@/etc/grafana-json/grafana-json.json"
+            - "{{ .Values.grafana.url }}/api/dashboards/import"
+          volumeMounts:
+            - mountPath: /etc/grafana-json
+              name: grafana-json-volume
+      restartPolicy: Never
+  backoffLimit: 2
+  successfulJobsHistoryLimit: 1
+  ttlSecondsAfterFinished: 120
+{{- end }}
