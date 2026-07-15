@@ -260,7 +260,7 @@ data:
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
-                "expr": "100 * sum by (pod) (irate(container_cpu_usage_seconds_total{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ .Release.Name }}-.*\"}[5m])) / sum by (pod) (kube_pod_container_resource_limits{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ .Release.Name }}-.*\", resource=\"cpu\"})",
+                "expr": "sum by (pod) (irate(container_cpu_usage_seconds_total{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ $.Release.Name }}-.*\", container!=\"\", container!=\"POD\"}[5m])) * 100",
                 "legendFormat": {{ `"{{pod}}"` }},
                 "refId": "A"
               }
