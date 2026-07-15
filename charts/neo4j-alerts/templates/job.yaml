@@ -6,6 +6,9 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "neo4j-alerts.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
     spec:

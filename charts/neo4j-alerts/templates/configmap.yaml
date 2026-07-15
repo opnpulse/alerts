@@ -21,8 +21,20 @@ data:
           },
           {
             "type": "panel",
-            "id": "graph",
-            "name": "Graph",
+            "id": "stat",
+            "name": "Stat",
+            "version": ""
+          },
+          {
+            "type": "panel",
+            "id": "gauge",
+            "name": "Gauge",
+            "version": ""
+          },
+          {
+            "type": "panel",
+            "id": "timeseries",
+            "name": "Time series",
             "version": ""
           }
         ],
@@ -47,216 +59,154 @@ data:
         "panels": [
           {
             "collapsed": false,
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "gridPos": {
-              "h": 1,
-              "w": 24,
-              "x": 0,
-              "y": 0
-            },
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
             "id": 28,
             "panels": [],
             "title": "Neo4j Phase & Availability",
             "type": "row"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {
-                    "params": [0],
-                    "type": "gt"
-                  },
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "1h", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "10s",
-              "frequency": "10s",
-              "handler": 1,
-              "name": "Neo4j Down alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 1},
-            "hiddenSeries": false,
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {"color": "green", "index": 0, "text": "OK"},
+                      "1": {"color": "red", "index": 1, "text": "DOWN"}
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 4, "w": 12, "x": 0, "y": 1},
             "id": 14,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "colorMode": "background",
+              "graphMode": "none",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "textMode": "auto"
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
-                "exemplar": true,
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
                 "expr": "kubedb_com_neo4j_status_phase{app=\"{{ .Release.Name }}\", namespace=\"{{ $.Release.Namespace }}\", phase=\"NotReady\"}",
-                "interval": "",
                 "legendFormat": "",
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 0, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
             "title": "Neo4j Down",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"$$hashKey": "object:88", "format": "short", "logBase": 1, "show": true},
-              {"$$hashKey": "object:89", "format": "short", "logBase": 1, "show": true}
-            ],
-            "yaxis": {"align": false}
+            "type": "stat"
           },
           {
-            "alert": {
-              "alertRuleTags": {"kdb": ""},
-              "conditions": [
-                {
-                  "evaluator": {"params": [0], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "1h", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "10s",
-              "frequency": "10s",
-              "handler": 1,
-              "name": "Neo4jPhaseCritical",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 1},
-            "hiddenSeries": false,
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {"color": "green", "index": 0, "text": "OK"},
+                      "1": {"color": "red", "index": 1, "text": "CRITICAL"}
+                    },
+                    "type": "value"
+                  }
+                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 4, "w": 12, "x": 12, "y": 1},
             "id": 2,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "colorMode": "background",
+              "graphMode": "none",
+              "justifyMode": "center",
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "textMode": "auto"
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
-                "exemplar": true,
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
                 "expr": "kubedb_com_neo4j_status_phase{app=\"{{ .Release.Name }}\", namespace=\"{{ $.Release.Namespace }}\", phase=\"Critical\"}",
-                "interval": "",
                 "legendFormat": "",
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 0, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
             "title": "Neo4j Critical Phase",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"$$hashKey": "object:70", "format": "short", "logBase": 1, "show": true},
-              {"$$hashKey": "object:71", "format": "short", "logBase": 1, "show": true}
-            ],
-            "yaxis": {"align": false}
+            "type": "stat"
           },
           {
             "collapsed": false,
             "datasource": null,
-            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 9},
+            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
             "id": 48,
             "panels": [],
             "title": "Neo4j Resource Usage",
             "type": "row"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [80], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j High CPU Usage alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "CPU usage is above 80%. Performance may be degraded.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
-            "hiddenSeries": false,
+            "description": "Current CPU usage per pod. Alert threshold at 80%.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 70},
+                    {"color": "red", "value": 80}
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 6},
             "id": 34,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "showThresholdLabels": false,
+              "showThresholdMarkers": true
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -265,214 +215,139 @@ data:
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 80, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Neo4j High CPU Usage",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "title": "Neo4j CPU Usage",
+            "type": "gauge"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [80], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j High Memory Usage alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "Memory usage is above 80%. More RAM may be needed.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
-            "hiddenSeries": false,
+            "description": "Current memory usage as % of limit per pod. Alert threshold at 80%.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "max": 100,
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 70},
+                    {"color": "red", "value": 80}
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 6},
             "id": 36,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "showThresholdLabels": false,
+              "showThresholdMarkers": true
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
-                "expr": "100 * sum by (pod) (container_memory_working_set_bytes{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ .Release.Name }}-.*\"}) / sum by (pod) (kube_pod_container_resource_limits{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ .Release.Name }}-.*\", resource=\"memory\"})",
+                "expr": "100 * sum by (pod) (container_memory_working_set_bytes{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ $.Release.Name }}-.*\", container!=\"\", container!=\"POD\"}) / sum by (pod) (kube_pod_container_resource_limits{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ $.Release.Name }}-.*\", resource=\"memory\"})",
                 "legendFormat": {{ `"{{pod}}"` }},
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 80, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Neo4j High Memory Usage",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "title": "Neo4j Memory Usage",
+            "type": "gauge"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [80], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j High Disk Usage alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "Disk usage is above 80%. Free up space or expand disk.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
-            "hiddenSeries": false,
+            "description": "Current PVC disk usage. Warning at 80%, critical at 95%.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "max": 100,
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 80},
+                    {"color": "red", "value": 95}
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 6},
             "id": 40,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "showThresholdLabels": false,
+              "showThresholdMarkers": true
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
-                "expr": "100 * (kubelet_volume_stats_used_bytes{namespace=\"{{ $.Release.Namespace }}\"} / on(persistentvolumeclaim) group_left() (kubelet_volume_stats_capacity_bytes{namespace=\"{{ $.Release.Namespace }}\"}))",
-                "legendFormat": "pvc",
+                "expr": "(kubelet_volume_stats_used_bytes{namespace=\"{{ $.Release.Namespace }}\"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{namespace=\"{{ $.Release.Namespace }}\"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace=\"{{ $.Release.Namespace }}\", pod=~\"{{ $.Release.Name }}-.*\"})) * 100",
+                "legendFormat": {{ `"{{persistentvolumeclaim}}"` }},
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 80, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Neo4j High Disk Usage",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "title": "Neo4j Disk Usage",
+            "type": "gauge"
           },
           {
             "collapsed": false,
             "datasource": null,
-            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26},
+            "gridPos": {"h": 1, "w": 24, "x": 0, "y": 14},
             "id": 50,
             "panels": [],
             "title": "Neo4j Page Cache Metrics",
             "type": "row"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [85], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j Page Cache Usage High alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "Page cache usage is above 85%. Consider increasing page cache memory.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 27},
-            "hiddenSeries": false,
+            "description": "Page cache fill level. Alert threshold at 85% — consider increasing page cache memory.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "max": 100,
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 80},
+                    {"color": "red", "value": 85}
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 15},
             "id": 52,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "showThresholdLabels": false,
+              "showThresholdMarkers": true
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -481,67 +356,42 @@ data:
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 85, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Neo4j Page Cache Usage High",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "title": "Neo4j Page Cache Usage",
+            "type": "gauge"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [98], "type": "lt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j Page Cache Hit Ratio Low alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "Page cache hit ratio is below 98%. Database is going to disk too often.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 27},
-            "hiddenSeries": false,
+            "description": "Page cache hit ratio — should stay above 98%. Lower means the DB is reading from disk too often.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "max": 100,
+                "min": 0,
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "orange", "value": 95},
+                    {"color": "green", "value": 98}
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 15},
             "id": 54,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "orientation": "auto",
+              "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": false
+              },
+              "showThresholdLabels": false,
+              "showThresholdMarkers": true
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -550,67 +400,51 @@ data:
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "lt", "value": 98, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
-            "title": "Neo4j Page Cache Hit Ratio Low",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "title": "Neo4j Page Cache Hit Ratio",
+            "type": "gauge"
           },
           {
-            "alert": {
-              "alertRuleTags": {},
-              "conditions": [
-                {
-                  "evaluator": {"params": [0], "type": "gt"},
-                  "operator": {"type": "and"},
-                  "query": {"params": ["A", "5m", "now"]},
-                  "reducer": {"params": [], "type": "last"},
-                  "type": "query"
-                }
-              ],
-              "executionErrorState": "alerting",
-              "for": "5m",
-              "frequency": "1m",
-              "handler": 1,
-              "name": "Neo4j Page Fault Failures alert",
-              "noDataState": "no_data",
-              "notifications": []
-            },
-            "aliasColors": {},
-            "bars": false,
-            "dashLength": 10,
-            "dashes": false,
             "datasource": null,
-            "description": "Page fault failures detected. Possible disk I/O issues or corruption.",
-            "fill": 1,
-            "fillGradient": 0,
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 35},
-            "hiddenSeries": false,
+            "description": "Page fault failures over 5m intervals. Any spike above 0 indicates disk I/O issues or corruption.",
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 10,
+                  "gradientMode": "none",
+                  "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {"type": "linear"},
+                  "showPoints": "never",
+                  "spanNulls": false,
+                  "stacking": {"group": "A", "mode": "none"},
+                  "thresholdsStyle": {"mode": "line"}
+                },
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              },
+              "overrides": []
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 15},
             "id": 56,
-            "legend": {"avg": false, "current": false, "max": false, "min": false, "show": true, "total": false, "values": false},
-            "lines": true,
-            "linewidth": 1,
-            "nullPointMode": "null",
-            "options": {"alertThreshold": true},
-            "percentage": false,
+            "options": {
+              "legend": {"calcs": [], "displayMode": "list", "placement": "bottom"},
+              "tooltip": {"mode": "multi"}
+            },
             "pluginVersion": "{{ .Values.grafana.version }}",
-            "pointradius": 2,
-            "points": false,
-            "renderer": "flot",
-            "seriesOverrides": [],
-            "spaceLength": 10,
-            "stack": false,
-            "steppedLine": false,
             "targets": [
               {
                 "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -619,21 +453,8 @@ data:
                 "refId": "A"
               }
             ],
-            "thresholds": [
-              {"colorMode": "critical", "fill": true, "line": true, "op": "gt", "value": 0, "visible": true}
-            ],
-            "timeFrom": null,
-            "timeRegions": [],
-            "timeShift": null,
             "title": "Neo4j Page Fault Failures",
-            "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
-            "type": "graph",
-            "xaxis": {"buckets": null, "mode": "time", "name": null, "show": true, "values": []},
-            "yaxes": [
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true},
-              {"format": "short", "label": null, "logBase": 1, "max": null, "min": null, "show": true}
-            ],
-            "yaxis": {"align": false, "alignLevel": null}
+            "type": "timeseries"
           }
         ],
         "refresh": "30s",
@@ -649,6 +470,6 @@ data:
         "version": 23
       },
       "folderId": 0,
-      "overwrite": false
+      "overwrite": true
     }
 {{- end }}
