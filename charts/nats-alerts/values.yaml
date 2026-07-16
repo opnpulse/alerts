@@ -112,7 +112,7 @@ form:
             val: 5
           natsStalledClients:
             enabled: true
-            duration: "5m"
+            duration: "15m"
             severity: warning
             val: 5
           natsStaleConnections:

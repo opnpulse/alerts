@@ -257,15 +257,15 @@ spec:
     - alert: NatsStalledClients
       expr: >-
         sum by (namespace, job, pod, server_id, server_name) (
-          increase(nats_varz_stalled_clients{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[10m])
+          increase(nats_varz_stalled_clients{job="{{ $job }}",namespace="{{ $.Release.Namespace }}"}[5m])
         ) >= {{ .rules.natsStalledClients.val }}
       for: {{ .rules.natsStalledClients.duration }}
       labels:
         severity: {{ .rules.natsStalledClients.severity }}
         {{- include "nats-alerts.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: "NATS server {{`{{`}} $labels.server_name {{`}}`}} has stalled clients"
-        description: "NATS server {{`{{`}} $labels.server_name {{`}}`}} reported stalled-client events in the last 10 minutes."
+        summary: "NATS server {{`{{`}} $labels.server_id {{`}}`}} is experiencing persistent client backpressure"
+        description: "NATS server {{`{{`}} $labels.server_id {{`}}`}} reported at least {{ .rules.natsStalledClients.val }} stalled-client events per 5-minute window for {{ .rules.natsStalledClients.duration }}."
 {{- end }}
 {{- if (include "nats-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.natsStaleConnections.enabled .rules.natsStaleConnections.severity)) }}
     - alert: NatsStaleConnections
