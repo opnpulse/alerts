@@ -26,7 +26,8 @@ import (
 )
 
 func TestDefaultValues(t *testing.T) {
-	checker := sc.New(os.DirFS("../../.."),
+	checker := sc.New(
+		os.DirFS("../../.."),
 		sc.TestCase{Obj: v1alpha1.B3AlertsSpec{}, File: "charts/b3-alerts/values.yaml"},
 		sc.TestCase{Obj: v1alpha1.CassandraAlertsSpec{}},
 		sc.TestCase{Obj: v1alpha1.ClickhouseAlertsSpec{}},
