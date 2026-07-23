@@ -1357,7 +1357,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "(kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ .Release.Name }}-overseer-\\\\d+$|{{ .Release.Name }}-coordinator-\\\\d+$|{{ .Release.Name }}-data-\\\\d+$|{{ .Release.Name }}-\\\\d+$\",namespace=~\"{{ .Release.Namespace }}\"}) )",
+                "expr": "(kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ .Release.Name }}-overseer-\\\\d+$|{{ .Release.Name }}-coordinator-\\\\d+$|{{ .Release.Name }}-data-\\\\d+$|{{ .Release.Name }}-\\\\d+$\",namespace=~\"{{ .Release.Namespace }}\"}) )",
                 "interval": "",
                 "legendFormat": {{ `"{{pod}}"` }},
                 "refId": "A"
@@ -1492,7 +1492,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "(kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ .Release.Name }}-overseer-\\\\d+$|{{ .Release.Name }}-coordinator-\\\\d+$|{{ .Release.Name }}-data-\\\\d+$|{{ .Release.Name }}-\\\\d+$\",namespace=~\"{{ .Release.Namespace }}\"}) )",
+                "expr": "(kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ .Release.Name }}-overseer-\\\\d+$|{{ .Release.Name }}-coordinator-\\\\d+$|{{ .Release.Name }}-data-\\\\d+$|{{ .Release.Name }}-\\\\d+$\",namespace=~\"{{ .Release.Namespace }}\"}) )",
                 "interval": "",
                 "legendFormat": {{ `"{{pod}}"` }},
                 "refId": "A"
