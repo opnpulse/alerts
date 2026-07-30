@@ -23,7 +23,7 @@ spec:
     rules:
     {{ if (include "cassandra-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDown.enabled .rules.cassandraDown.severity)) -}}
     - alert: CassandraDown
-      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.val}}
+      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > 0
       for: {{ .rules.cassandraDown.duration }}
       labels:
         job: {{ $app }}-stats
