@@ -139,7 +139,7 @@ spec:
     {{- end }}
     {{ if (include "postgres-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresSlowQueries.enabled .rules.postgresSlowQueries.severity)) -}}
     - alert: PostgresqlSlowQueries
-      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active"} > {{ .rules.postgresSlowQueries.val }}
+      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active",application_name!~"pg_dump.*"} > {{ .rules.postgresSlowQueries.val }}
       for: {{ .rules.postgresSlowQueries.duration }}
       labels:
         severity: {{ .rules.postgresSlowQueries.severity }}
