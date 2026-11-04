@@ -1,0 +1,326 @@
+{{ $app := (include "yugabytedb-alerts.fullname" .) }}
+
+{{ if (include "yugabytedb-alerts.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "yugabytedb-alerts.labels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "yugabytedb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: yugabytedb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBInstanceDown.enabled .rules.yugabyteDBInstanceDown.severity)) -}}
+    - alert: YugabyteDBInstanceDown
+      expr: up{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} == 0
+      for: {{ .rules.yugabyteDBInstanceDown.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBInstanceDown.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB instance down (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "YugabyteDB metrics scrape is down. The pod may be unavailable or the stats endpoint may be unreachable.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBRestarted.enabled .rules.yugabyteDBRestarted.severity)) -}}
+    - alert: YugabyteDBRestarted
+      expr: (time() - min by (pod) (kube_pod_start_time{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+"})) < {{ .rules.yugabyteDBRestarted.val }}
+      for: {{ .rules.yugabyteDBRestarted.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBRestarted.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB pod recently restarted (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "YugabyteDB pod {{`{{`}} $labels.pod {{`}}`}} restarted within the configured window.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBTServerDead.enabled .rules.yugabyteDBTServerDead.severity)) -}}
+    - alert: YugabyteDBTServerDead
+      expr: max(num_tablet_servers_dead{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) > 0
+      for: {{ .rules.yugabyteDBTServerDead.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBTServerDead.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: A YugabyteDB tserver is dead (universe {{ $app }})
+        description: "A master reports at least one tserver as dead (missed its heartbeat window).\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBClockSkewHigh.enabled .rules.yugabyteDBClockSkewHigh.severity)) -}}
+    - alert: YugabyteDBClockSkewHigh
+      expr: max by (pod) (hybrid_clock_skew{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) > {{ .rules.yugabyteDBClockSkewHigh.val }}
+      for: {{ .rules.yugabyteDBClockSkewHigh.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBClockSkewHigh.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB clock skew high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "Clock skew is approaching the universe's own max_clock_skew_usec (500000us by default; above it the server rejects operations).\n  VALUE = {{`{{`}} $value {{`}}`}} microseconds\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBFollowerLagHigh.enabled .rules.yugabyteDBFollowerLagHigh.severity)) -}}
+    - alert: YugabyteDBFollowerLagHigh
+      expr: max by (pod) (follower_lag_ms{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) > {{ .rules.yugabyteDBFollowerLagHigh.val }}
+      for: {{ .rules.yugabyteDBFollowerLagHigh.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBFollowerLagHigh.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB follower lag high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "A tablet peer has gone too long without an UpdateConsensus request from its leader.\n  VALUE = {{`{{`}} $value {{`}}`}} ms\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBMemoryPressureRejectionsHigh.enabled .rules.yugabyteDBMemoryPressureRejectionsHigh.severity)) -}}
+    - alert: YugabyteDBMemoryPressureRejectionsHigh
+      expr: |
+        (
+          increase(operation_memory_pressure_rejections{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])
+          + increase(follower_memory_pressure_rejections{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])
+          + increase(leader_memory_pressure_rejections{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])
+        ) > {{ .rules.yugabyteDBMemoryPressureRejectionsHigh.val }}
+      for: {{ .rules.yugabyteDBMemoryPressureRejectionsHigh.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBMemoryPressureRejectionsHigh.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB rejecting operations for memory pressure (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "The tserver rejected operations because of memory pressure in the last 5 minutes.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBYSQLConnMgrQueueHigh.enabled .rules.yugabyteDBYSQLConnMgrQueueHigh.severity)) -}}
+    - alert: YugabyteDBYSQLConnMgrQueueHigh
+      expr: max by (pod) (ysql_conn_mgr_queued_clients{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) > {{ .rules.yugabyteDBYSQLConnMgrQueueHigh.val }}
+      for: {{ .rules.yugabyteDBYSQLConnMgrQueueHigh.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBYSQLConnMgrQueueHigh.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YSQL Connection Manager queue high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "YSQL clients are queueing in the Connection Manager waiting for a physical connection.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBHighCPUUsage.enabled .rules.yugabyteDBHighCPUUsage.severity)) -}}
+    - alert: YugabyteDBHighCPUUsage
+      expr: |
+        (
+          sum by (pod) (
+            irate(container_cpu_usage_seconds_total{image!="",container!="POD",job="kubelet",metrics_path="/metrics/cadvisor",namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+"}[5m])
+          )
+          /
+          sum by (pod) (
+            kube_pod_container_resource_requests{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+",resource="cpu"}
+          )
+        ) * 100 > {{ .rules.yugabyteDBHighCPUUsage.val }}
+      for: {{ .rules.yugabyteDBHighCPUUsage.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBHighCPUUsage.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB pod CPU usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "YugabyteDB pod CPU usage is above {{ .rules.yugabyteDBHighCPUUsage.val }} percent of requested CPU.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.yugabyteDBHighMemoryUsage.enabled .rules.yugabyteDBHighMemoryUsage.severity)) -}}
+    - alert: YugabyteDBHighMemoryUsage
+      expr: |
+        (
+          sum by (pod) (
+            container_memory_working_set_bytes{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+",container!="",image!=""}
+          )
+          /
+          sum by (pod) (
+            kube_pod_container_resource_limits{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+",resource="memory"}
+          )
+        ) * 100 > {{ .rules.yugabyteDBHighMemoryUsage.val }}
+      for: {{ .rules.yugabyteDBHighMemoryUsage.duration }}
+      labels:
+        severity: {{ .rules.yugabyteDBHighMemoryUsage.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB pod memory usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "YugabyteDB pod memory usage is above {{ .rules.yugabyteDBHighMemoryUsage.val }} percent of the memory limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    - alert: DiskUsageHigh
+      expr: (kubelet_volume_stats_used_bytes{job="kubelet",metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet",metrics_path="/metrics"}) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+"} * 100 > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent volume usage high for YugabyteDB (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "Persistent volume usage is above {{ .rules.diskUsageHigh.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    - alert: DiskAlmostFull
+      expr: (kubelet_volume_stats_used_bytes{job="kubelet",metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet",metrics_path="/metrics"}) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(master|tserver|readreplica)-[0-9]+"} * 100 > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent volume critically full for YugabyteDB (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "Persistent volume usage is above {{ .rules.diskAlmostFull.val }} percent. YugabyteDB itself starts rejecting writes below 5 percent free.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "yugabytedb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: yugabytedb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBYugabyteDBPhaseNotReady
+      expr: kubedb_com_yugabytedb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB YugabyteDB Phase NotReady (app {{`{{`}} $labels.app {{`}}`}})
+        description: "KubeDB YugabyteDB Phase not ready on {{`{{`}} $labels.app {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBYugabyteDBPhaseCritical
+      expr: kubedb_com_yugabytedb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB YugabyteDB Phase Critical (app {{`{{`}} $labels.app {{`}}`}})
+        description: "KubeDB YugabyteDB Phase Critical {{`{{`}} $labels.app {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.opsManager -}}
+  {{ if (include "yugabytedb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: yugabytedb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    - alert: KubeDBYugabyteDBOpsRequestOnProgress
+      expr: ops_kubedb_com_yugabytedbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestOnProgress.duration }}
+      labels:
+        severity: {{ .rules.opsRequestOnProgress.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDBOpsRequest on progress (app {{`{{`}} $labels.app {{`}}`}})
+        description: "A YugabyteDBOpsRequest on {{`{{`}} $labels.app {{`}}`}} is in progressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    - alert: KubeDBYugabyteDBOpsRequestStatusProgressingToLong
+      expr: ops_kubedb_com_yugabytedbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      labels:
+        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDBOpsRequest is in progressing status for too long (app {{`{{`}} $labels.app {{`}}`}})
+        description: "A YugabyteDBOpsRequest on {{`{{`}} $labels.app {{`}}`}} is in progressing status for too long. KubeDB ops requests do not self-heal; this one needs a manual look.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    - alert: KubeDBYugabyteDBOpsRequestFailed
+      expr: ops_kubedb_com_yugabytedbopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestFailed.duration }}
+      labels:
+        severity: {{ .rules.opsRequestFailed.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDBOpsRequest failed (app {{`{{`}} $labels.app {{`}}`}})
+        description: "A YugabyteDBOpsRequest on {{`{{`}} $labels.app {{`}}`}} failed. KubeDB ops requests do not self-heal; this one needs a manual look.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.kubeStash -}}
+  {{ if (include "yugabytedb-alerts.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: yugabytedb.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    - alert: YugabyteDBKubeStashBackupSessionFailed
+      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash backup session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    - alert: YugabyteDBKubeStashRestoreSessionFailed
+      expr: core_kubestash_com_restoresession_phase{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    - alert: YugabyteDBKubeStashNoBackupSessionForTooLong
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    - alert: YugabyteDBKubeStashRepositoryCorrupted
+      expr: storage_kubestash_com_repository_info{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    - alert: YugabyteDBKubeStashRepositoryStorageRunningLow
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    - alert: YugabyteDBKubeStashBackupSessionPeriodTooLong
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash backup session taking too long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "yugabytedb-alerts.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    - alert: YugabyteDBKubeStashRestoreSessionPeriodTooLong
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="YugabyteDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "yugabytedb-alerts.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: YugabyteDB KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "YugabyteDB KubeStash restore session taking too long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+{{- end }}

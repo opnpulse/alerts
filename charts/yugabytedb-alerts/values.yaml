@@ -1,0 +1,175 @@
+metadata:
+  resource:
+    group: kubedb.com
+    kind: YugabyteDB
+    name: yugabytedbs
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: prometheus
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for YugabyteDB metrics scrape failure.
+          yugabyteDBInstanceDown:
+            enabled: true
+            duration: 30s
+            severity: critical
+          # Specifies the alert configuration for YugabyteDB pod restarts.
+          yugabyteDBRestarted:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 180
+          # Specifies the alert configuration for a tserver a master reports as dead.
+          yugabyteDBTServerDead:
+            enabled: true
+            duration: 1m
+            severity: critical
+          # Specifies the alert configuration for server clock skew, as a fraction of the
+          # universe's own max_clock_skew_usec (500000us by default).
+          yugabyteDBClockSkewHigh:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 250000
+          # Specifies the alert configuration for tablet follower lag, in milliseconds.
+          yugabyteDBFollowerLagHigh:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 60000
+          # Specifies the alert configuration for operations rejected under memory pressure.
+          yugabyteDBMemoryPressureRejectionsHigh:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 0
+          # Specifies the alert configuration for clients queueing in the YSQL Connection Manager.
+          yugabyteDBYSQLConnMgrQueueHigh:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 50
+          # Specifies the alert configuration for YugabyteDB CPU usage percentage against requests.
+          yugabyteDBHighCPUUsage:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for YugabyteDB memory usage percentage against limits.
+          yugabyteDBHighMemoryUsage:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for persistent volume usage.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: 1m
+            severity: warning
+          # Specifies the alert configuration for critically high persistent volume usage. 95
+          # percent matches YugabyteDB's own threshold: it starts rejecting writes below 5 percent
+          # free.
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: 1m
+            severity: critical
+
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: 1m
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: 15m
+            severity: warning
+
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+
+      kubeStash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          restoreSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          noBackupSessionForTooLong:
+            enabled: true
+            duration: "0m"
+            val: 18000
+            severity: warning
+          repositoryCorrupted:
+            enabled: true
+            duration: "5m"
+            severity: critical
+          repositoryStorageRunningLow:
+            enabled: true
+            duration: "5m"
+            val: 10737418240 # 10GB
+            severity: warning
+          backupSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+          restoreSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+
+# Grafana dashboard auto-import. Not wired to a dashboard yet: the YugabyteDB Grafana dashboards
+# have not been added to this repo. Leave disabled until that lands.
+grafana:
+  enabled: false
+  version: 7.5.5
+  jobName: kubedb-databases
+  url: ""
+  apikey: ""

@@ -1,0 +1,665 @@
+properties:
+  form:
+    properties:
+      alert:
+        properties:
+          additionalRuleLabels:
+            additionalProperties:
+              type: string
+            type: object
+          annotations:
+            additionalProperties:
+              type: string
+            type: object
+          enabled:
+            enum:
+            - none
+            - critical
+            - warning
+            - info
+            type: string
+          groups:
+            properties:
+              database:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    description: 'YugabytedbDatabaseAlertRules. Every rule is scoped
+                      to the stats Service of one universe
+
+                      (master, tserver and, when configured, read replica pods).'
+                    properties:
+                      diskAlmostFull:
+                        description: 'DiskAlmostFull fires near YugabyteDB''s own
+                          5 percent free space floor, below which the
+
+                          universe starts rejecting writes.'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      diskUsageHigh:
+                        description: DiskUsageHigh fires on high persistent volume
+                          usage.
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBClockSkewHigh:
+                        description: 'YugabyteDBClockSkewHigh fires when a server''s
+                          clock skew approaches the universe''s own
+
+                          max_clock_skew_usec (500000us / 500ms by default; above
+                          it the server rejects operations).'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBFollowerLagHigh:
+                        description: 'YugabyteDBFollowerLagHigh fires when a tablet
+                          peer has gone too long without an
+
+                          UpdateConsensus request from its leader.'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBHighCPUUsage:
+                        description: YugabyteDBHighCPUUsage fires on high pod CPU
+                          usage against its requests.
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBHighMemoryUsage:
+                        description: YugabyteDBHighMemoryUsage fires on high pod memory
+                          usage against its limits.
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBInstanceDown:
+                        description: 'YugabyteDBInstanceDown fires when a master,
+                          tserver or read replica pod''s metrics endpoint
+
+                          stops responding.'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      yugabyteDBMemoryPressureRejectionsHigh:
+                        description: 'YugabyteDBMemoryPressureRejectionsHigh fires
+                          when a tserver rejects operations for memory
+
+                          pressure (operation, follower or leader rejections).'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBRestarted:
+                        description: YugabyteDBRestarted fires shortly after any pod
+                          restarts.
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      yugabyteDBTServerDead:
+                        description: 'YugabyteDBTServerDead fires when a master reports
+                          a tserver as dead (missed its heartbeat
+
+                          window, FLAGS_tserver_unresponsive_timeout_ms).'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      yugabyteDBYSQLConnMgrQueueHigh:
+                        description: 'YugabyteDBYSQLConnMgrQueueHigh fires when YSQL
+                          clients queue in the Connection Manager
+
+                          waiting for a physical connection.'
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                    required:
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - yugabyteDBClockSkewHigh
+                    - yugabyteDBFollowerLagHigh
+                    - yugabyteDBHighCPUUsage
+                    - yugabyteDBHighMemoryUsage
+                    - yugabyteDBInstanceDown
+                    - yugabyteDBMemoryPressureRejectionsHigh
+                    - yugabyteDBRestarted
+                    - yugabyteDBTServerDead
+                    - yugabyteDBYSQLConnMgrQueueHigh
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              kubeStash:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      backupSessionFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      backupSessionPeriodTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      noBackupSessionForTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      repositoryCorrupted:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      repositoryStorageRunningLow:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      restoreSessionFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      restoreSessionPeriodTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                    required:
+                    - backupSessionFailed
+                    - backupSessionPeriodTooLong
+                    - noBackupSessionForTooLong
+                    - repositoryCorrupted
+                    - repositoryStorageRunningLow
+                    - restoreSessionFailed
+                    - restoreSessionPeriodTooLong
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              opsManager:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      opsRequestFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestOnProgress:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestStatusProgressingToLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - opsRequestFailed
+                    - opsRequestOnProgress
+                    - opsRequestStatusProgressingToLong
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              provisioner:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      appPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      appPhaseNotReady:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - appPhaseCritical
+                    - appPhaseNotReady
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+            required:
+            - database
+            - kubeStash
+            - opsManager
+            - provisioner
+            type: object
+          labels:
+            additionalProperties:
+              type: string
+            type: object
+        required:
+        - enabled
+        - groups
+        - labels
+        type: object
+    required:
+    - alert
+    type: object
+  grafana:
+    properties:
+      apikey:
+        type: string
+      enabled:
+        type: boolean
+      jobName:
+        type: string
+      url:
+        type: string
+      version:
+        type: string
+    required:
+    - apikey
+    - enabled
+    - jobName
+    - url
+    - version
+    type: object
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration
+
+              too: plural.group and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+required:
+- form
+- grafana
+type: object
