@@ -107,6 +107,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&SolrAlertsList{},
 		&WeaviateAlerts{},
 		&WeaviateAlertsList{},
+		&YugabytedbAlerts{},
+		&YugabytedbAlertsList{},
 		&VaultserverAlerts{},
 		&VaultserverAlertsList{},
 		&NATSAlerts{},
