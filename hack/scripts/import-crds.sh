@@ -24,5 +24,6 @@ for dir in charts/*/; do
     # echo $dir
     crd-importer \
         --input=https://github.com/prometheus-operator/prometheus-operator/raw/${PROMETHEUS_OPERATOR_PROMETHEUS_OPERATOR_TAG}/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml \
+        --annotations 'config.kubernetes.io/local-config=true' \
         --out=./charts/$dir/crds
 done

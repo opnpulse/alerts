@@ -2,6 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    config.kubernetes.io/local-config: "true"
     controller-gen.kubebuilder.io/version: v0.14.0
     operator.prometheus.io/version: 0.74.0
   name: prometheusrules.monitoring.coreos.com
